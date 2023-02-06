@@ -1,13 +1,16 @@
+use std::collections::VecDeque;
+
 use super::constants::*;
 use super::error::{LispError, LispResult};
 use super::types::*;
-use log::trace;
+use log::{debug, trace};
 
 impl VirtualMachine {
     pub fn evaluate(&mut self, exp: TypedPointer) -> LispResult<TypedPointer> {
         self.registers.exp = exp;
-        self.registers.env = ConstSymbol::NIL; // TODO: Use default environment
+        self.registers.env = ConstSymbol::E0;
         self.registers.cont = ConstSymbol::DONE;
+        self.registers.val = TypedPointer::default();
         self.ev_eval_dispatch()?;
 
         Ok(self.registers.val.clone())
@@ -155,6 +158,14 @@ impl VirtualMachine {
     fn ev_eval_arg_loop(&mut self) -> LispResult<()> {
         trace!("eval_arg_loop");
         self.stack_push(self.registers.argl.clone())?;
+
+        if self.registers.unev.clone() == ConstSymbol::NIL {
+            self.registers.argl = self.stack_pop()?;
+            self.registers.fun = self.stack_pop()?;
+
+            return self.ev_apply_dispatch();
+        }
+
         self.registers.exp = self.get_car(&self.registers.unev.clone())?;
 
         if EvalHelper::last_operand_p(&self, self.registers.unev.clone())? {
@@ -192,6 +203,7 @@ impl VirtualMachine {
     fn ev_accumulate_last_arg(&mut self) -> LispResult<()> {
         trace!("accumulate_last_arg");
         self.registers.argl = self.stack_pop()?;
+
         let new_argl = self.make_cons()?;
         self.set_car(&new_argl, self.registers.val.clone())?;
         self.set_cdr(&new_argl, self.registers.argl.clone())?;
@@ -224,7 +236,6 @@ impl VirtualMachine {
 
         let fun = self.registers.fun.clone();
 
-        // TODO: add special forms?
         if EvalHelper::primitive_function_p(fun.clone()) {
             self.ev_primitive_fn_apply()
         } else if EvalHelper::compound_function_p(fun.clone()) {
@@ -267,10 +278,21 @@ impl VirtualMachine {
     ) -> LispResult<TypedPointer> {
         trace!("apply_primitive_fn");
         // apply primitive fn to list of arguments.
-        // remember that ARGL is inverted!
-        Err(LispError::internal(
-            "ev_apply_primitive_fn: not implemented",
-        ))
+        // Invert ARGL into vector
+        let argl = {
+            let mut v = Vec::new();
+            let mut argl = argl.clone();
+
+            while argl != ConstSymbol::NIL {
+                let car = self.get_car(&argl.clone())?;
+                argl = self.get_cdr(&argl.clone())?;
+                v.push(car);
+            }
+
+            v
+        };
+
+        self.dispatch_prim_eval(fun, &argl)
     }
 
     fn ev_make_bindings(
@@ -280,9 +302,39 @@ impl VirtualMachine {
         env: TypedPointer,
     ) -> LispResult<TypedPointer> {
         trace!("make_bindings");
-        // TODO: Make proper binding routine.
-        // Remember that ARGL is inverted!
-        Err(LispError::internal("ev_make_bindings: not implemented"))
+
+        // Invert ARGL into vector
+        let mut argl_inv = VecDeque::new();
+        let mut lambda_list_vec = VecDeque::new();
+
+        // TODO: These bindings do not consider special cases yet.
+        // For now, arity does not change!
+        let bindings = {
+            let mut argl = argl.clone();
+            let mut ll = lambda_list.clone();
+
+            while argl != ConstSymbol::NIL {
+                let car = self.get_car(&argl.clone())?;
+                argl = self.get_cdr(&argl.clone())?;
+                argl_inv.push_back(car);
+            }
+
+            while ll != ConstSymbol::NIL {
+                let car = self.get_car(&ll.clone())?;
+                ll = self.get_cdr(&ll.clone())?;
+                lambda_list_vec.push_front(car);
+            }
+
+            lambda_list_vec.iter().zip(argl_inv.iter())
+        };
+
+        let new_env = self.make_environment(env)?;
+
+        for (symbol, value) in bindings {
+            self.env_bind(new_env.clone(), symbol.clone(), value.clone())?;
+        }
+
+        Ok(new_env)
     }
 }
 
@@ -371,6 +423,25 @@ impl VirtualMachine {
         if atom.tag != DataType::Atom {
             return Err(LispError::internal("attempted to lookup value of non-atom"));
         }
+
+        let mut env = self.registers.env.clone();
+
+        let mut value = TypedPointer::default();
+
+        while env != ConstSymbol::NIL {
+            match self.env_lookup(env.clone(), atom.clone())? {
+                Some(v) => {
+                    value = v;
+                    break;
+                }
+                None => env = self.env_parent(env.clone())?,
+            }
+        }
+
+        if value.tag != DataType::Undefined {
+            return Ok(value);
+        }
+
         let atom: &Atom = self.atoms.area.get(atom.value).unwrap();
         Ok(atom.value.clone())
     }

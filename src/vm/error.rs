@@ -7,7 +7,9 @@ enum LispErrorKind {
     AtomTableAllocation,
     NumberTableAllocation,
     ListAreaAllocation,
+    EnvironmentTableAllocation,
     Internal(&'static str),
+    Arity(String),
 }
 
 #[derive(Debug)]
@@ -46,6 +48,18 @@ impl LispError {
         }
     }
 
+    pub fn environment_table_allocation() -> Self {
+        Self {
+            kind: LispErrorKind::EnvironmentTableAllocation,
+        }
+    }
+
+    pub fn arity(fn_name: String) -> Self {
+        Self {
+            kind: LispErrorKind::Arity(fn_name),
+        }
+    }
+
     pub fn internal(reason: &'static str) -> Self {
         Self {
             kind: LispErrorKind::Internal(reason),
@@ -60,14 +74,17 @@ impl fmt::Display for LispError {
         write!(
             f,
             "Error with Majestic Lisp environment: {}",
-            match self.kind {
+            match &self.kind {
                 LispErrorKind::StackOverflow => "stack overflow".to_owned(),
                 LispErrorKind::StackUnderflow => "stack underflow".to_owned(),
                 LispErrorKind::AtomTableAllocation => "atom table allocation error".to_owned(),
                 LispErrorKind::NumberTableAllocation => "number table allocation error".to_owned(),
                 LispErrorKind::ListAreaAllocation => "list area allocation error".to_owned(),
+                LispErrorKind::EnvironmentTableAllocation =>
+                    "environment area allocation error".to_owned(),
+                LispErrorKind::Arity(name) =>
+                    format!("arity error while applying function {}", name),
                 LispErrorKind::Internal(cause) => format!("internal error: {}", cause),
-                _ => "unknown error".to_owned(),
             }
         )
     }

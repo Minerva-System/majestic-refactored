@@ -3,6 +3,7 @@ use super::types::*;
 #[non_exhaustive]
 pub struct ConstSymbol;
 
+// Fixed symbols
 impl ConstSymbol {
     pub const NIL: TypedPointer = TypedPointer {
         tag: DataType::Atom,
@@ -92,8 +93,10 @@ impl ConstSymbol {
         tag: DataType::Atom,
         value: 21,
     };
+}
 
-    // Built-in literals, used on evaluator
+// Built-in literals, used on evaluator mostly
+impl ConstSymbol {
     pub const DONE: TypedPointer = TypedPointer {
         tag: DataType::BuiltInLiteral,
         value: 0,
@@ -113,5 +116,36 @@ impl ConstSymbol {
     pub const EVAL_ASSIGN: TypedPointer = TypedPointer {
         tag: DataType::BuiltInLiteral,
         value: 4,
+    };
+}
+
+// Default environment
+impl ConstSymbol {
+    pub const E0: TypedPointer = TypedPointer {
+        tag: DataType::Environment,
+        value: 0,
+    };
+}
+
+// Built-in functions
+impl ConstSymbol {
+    pub const BIN_CONS: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 0,
+    };
+
+    pub const BIN_LIST: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 1,
+    };
+
+    pub const BIN_CAR: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 2,
+    };
+
+    pub const BIN_CDR: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 3,
     };
 }

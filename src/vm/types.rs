@@ -3,14 +3,18 @@
 // pub const LIST_AREA_SIZE: usize = 16777216; // 16MB list area
 // pub const LISP_STACK_SIZE: usize = 8388608; // 8MB stack
 
+use super::ConstSymbol;
+
 pub const ATOM_TABLE_SIZE: usize = 10000; // 30000 atoms
 pub const NUMBER_TABLE_SIZE: usize = 10000; // 30000 numbers (indexed after atom table)
 pub const LIST_AREA_SIZE: usize = 524288; // # of cells, total 16MB
 pub const LISP_STACK_SIZE: usize = 524288; // # of pointers, total 8MB
+pub const ENV_TABLE_SIZE: usize = 2000; // 1000 environments
+pub const MAX_ENV_CAPACITY: usize = 200; // Each env can contain at most 200 bindings
 
 pub type UntypedPointer = usize;
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub enum DataType {
     Undefined,
     Cons,
@@ -20,9 +24,10 @@ pub enum DataType {
     BuiltInLiteral,
     Function,
     Literal,
+    Environment,
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Hash)]
 pub struct TypedPointer {
     pub tag: DataType,
     pub value: UntypedPointer,
@@ -54,6 +59,7 @@ impl std::fmt::Display for TypedPointer {
                 DataType::BuiltInLiteral => "BINLT",
                 DataType::Function => "FUNCT",
                 DataType::Literal => "LITER",
+                DataType::Environment => "  ENV",
                 _ => "UNKNW",
             },
             self.value
@@ -247,6 +253,38 @@ impl Default for ListArea {
     }
 }
 
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct Environment {
+    pub prev: TypedPointer,
+    pub data: std::collections::HashMap<TypedPointer, TypedPointer>,
+}
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {
+            prev: ConstSymbol::NIL,
+            data: std::collections::HashMap::with_capacity(MAX_ENV_CAPACITY),
+        }
+    }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct EnvironmentTable {
+    pub last: UntypedPointer,
+    pub area: Vec<Environment>,
+}
+
+impl Default for EnvironmentTable {
+    fn default() -> Self {
+        Self {
+            last: 0,
+            area: (0..ENV_TABLE_SIZE)
+                .map(|_| Environment::default())
+                .collect(),
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct VirtualMachine {
     pub registers: RegisterArea,
@@ -254,6 +292,7 @@ pub struct VirtualMachine {
     pub atoms: AtomTable,
     pub numbers: NumberTable,
     pub lists: ListArea,
+    pub environments: EnvironmentTable,
 
     pub atom_index: std::collections::HashMap<String, usize>,
 }
@@ -266,6 +305,7 @@ impl Default for VirtualMachine {
             atoms: AtomTable::default(),
             numbers: NumberTable::default(),
             lists: ListArea::default(),
+            environments: EnvironmentTable::default(),
             atom_index: std::collections::HashMap::new(),
         }
     }

@@ -3,7 +3,7 @@ static VERSION: &'static str = include_str!(concat!(env!("OUT_DIR"), "/version.t
 static TARGET: &'static str = include_str!(concat!(env!("OUT_DIR"), "/target.txt"));
 
 use colored::*;
-use log::{debug, info};
+use log::{debug, error, info};
 use rustyline::error::ReadlineError;
 use rustyline::validate::{ValidationContext, ValidationResult, Validator};
 use rustyline::Editor;
@@ -21,9 +21,8 @@ fn load_log_config() {
     let mut cfg = std::env::current_dir().unwrap();
     cfg.push("log_config.yml");
 
-    match log4rs::init_file(cfg.clone(), Default::default()) {
-        Ok(_) => debug!("Loaded log config file: {}", cfg.display()),
-        Err(e) => eprintln!("Error starting logs: {}", e),
+    if let Ok(_) = log4rs::init_file(cfg.clone(), Default::default()) {
+        debug!("Loaded log config file: {}", cfg.display());
     }
 }
 
@@ -75,13 +74,27 @@ impl Validator for MajInputValidator {
 }
 
 fn repl(mut vm: &mut VirtualMachine) {
-    println!("Press C-c or C-d to quit");
+    let history_path = {
+        let mut path = std::env::current_dir().unwrap();
+        path.push(".majestic_history");
+        path
+    };
 
     let validator = MajInputValidator {};
 
-    let mut rl = Editor::new().unwrap();
+    let config = rustyline::Config::builder()
+        .history_ignore_space(true)
+        .completion_type(rustyline::CompletionType::List)
+        .edit_mode(rustyline::EditMode::Emacs)
+        .build();
+
+    let mut rl = Editor::with_config(config).unwrap();
     rl.set_helper(Some(validator));
-    let _ = rl.load_history(".majestic_history");
+
+    match rl.load_history(&history_path) {
+        Ok(()) => info!("History loaded."),
+        Err(e) => debug!("Unable to load history: {}", e),
+    }
 
     let prompt = format!("{}", "> ".green());
     let prompt_dbg = format!("{}", "> ".red());
@@ -89,6 +102,7 @@ fn repl(mut vm: &mut VirtualMachine) {
     let mut ast = false;
     let mut echo = false;
 
+    println!("Press C-c or C-d to quit");
     loop {
         let readline = rl.readline(if !ast && !echo { &prompt } else { &prompt_dbg });
         match readline {
@@ -98,11 +112,17 @@ fn repl(mut vm: &mut VirtualMachine) {
             Ok(line) if line.trim() == "#list" => vm.print_list_area(),
             Ok(line) if line.trim() == "#ast" => ast = !ast,
             Ok(line) if line.trim() == "#echo" => echo = !echo,
+            Ok(line) if line.trim().starts_with("#env") => match line.trim()[4..].trim().parse() {
+                Ok(num) => vm.print_env(num),
+                Err(_) => println!("Could not parse environment number"),
+            },
             Ok(line) if (line.trim().len() > 0) && line.trim().get(0..1).unwrap() == "#" => {
                 eprintln!("Unknown command {}.", line.trim())
             }
             Ok(line) => {
                 use chumsky::Parser;
+                rl.add_history_entry(line.clone().trim());
+
                 let (maj, errs) = Combinators::parser().parse_recovery(line.trim());
                 report_error(line, errs);
 
@@ -152,8 +172,12 @@ fn repl(mut vm: &mut VirtualMachine) {
         }
     }
 
-    if let Err(_) = rl.save_history(".majestic_history") {
-        eprintln!("Failed saving history to .majestic_history.");
+    debug!("Saving history...");
+
+    if let Err(e) = rl.save_history(&history_path) {
+        error!("Failed saving history to .maj_history: {}", e);
+    } else {
+        debug!("History file saved.");
     }
 
     println!("Quaerendo invenietis.");

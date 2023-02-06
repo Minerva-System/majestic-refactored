@@ -9,6 +9,7 @@ pub fn print_object(vm: &VirtualMachine, ptr: &TypedPointer) {
         DataType::Literal => print!("#<LITERAL {{{:#08x}}}>", ptr.value),
         DataType::BuiltInFunction => print!("#<BUILTIN-FUNCTION {{{:#08x}}}>", ptr.value),
         DataType::BuiltInLiteral => print!("#<BUILTIN-LITERAL {{{:#08x}}}>", ptr.value),
+        DataType::Environment => print!("#<ENV{}>", ptr.value),
         DataType::Cons => {
             print!("(");
             print_list(&vm, &ptr);
