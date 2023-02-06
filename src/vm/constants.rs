@@ -153,4 +153,9 @@ impl ConstSymbol {
         tag: DataType::BuiltInFunction,
         value: 4,
     };
+
+    pub const BIN_EQ: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 5,
+    };
 }

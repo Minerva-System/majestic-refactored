@@ -1,6 +1,6 @@
 use super::error::{LispError, LispResult};
 use super::{types::*, ConstSymbol};
-use log::{debug, trace};
+use log::{debug, trace, warn};
 
 impl VirtualMachine {
     pub fn dispatch_prim_eval(
@@ -16,6 +16,7 @@ impl VirtualMachine {
             ConstSymbol::BIN_CDR => builtin_cdr(self, argl),
             ConstSymbol::BIN_LIST => builtin_list(self, argl),
             ConstSymbol::BIN_EVAL => builtin_eval(self, argl),
+            ConstSymbol::BIN_EQ => builtin_eq(self, argl),
             _ => Err(LispError::internal("unknown primitive function")),
         }
     }
@@ -106,4 +107,50 @@ fn builtin_eval(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<Ty
     vm.registers.argl = vm.stack_pop()?;
 
     Ok(val)
+}
+
+fn builtin_eq(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<TypedPointer> {
+    trace!("builtin_eq");
+    if argl.len() != 2 {
+        return Err(LispError::arity("eq".to_owned()));
+    }
+
+    let first = argl[0].clone();
+    let second = argl[1].clone();
+
+    let convert = |v| if v { ConstSymbol::T } else { ConstSymbol::NIL };
+
+    Ok(if first.tag != second.tag {
+        ConstSymbol::NIL
+    } else {
+        match first.tag {
+            // Most values can be pointer-compared
+            DataType::Atom
+            | DataType::Cons
+            | DataType::BuiltInFunction
+            | DataType::BuiltInLiteral
+            | DataType::Function
+            | DataType::Literal => convert(first.value == second.value),
+            // Environment comparison is undefined, so we better not compare at all
+            DataType::Environment => {
+                return Err(LispError::internal(
+                    "attempted to eq-compare two environments",
+                ))
+            }
+            // Numbers should be compared by actual value
+            DataType::Number => {
+                warn!("eq-comparing numbers; this should be improved");
+                let first: &Number = vm.numbers.area.get(first.value).unwrap();
+                let second: &Number = vm.numbers.area.get(second.value).unwrap();
+                convert(first == second)
+            }
+            // "undefined == undefined" could be seen as true, but this
+            // does not make sense at all
+            DataType::Undefined => {
+                return Err(LispError::internal(
+                    "attempted to compare two undefined values",
+                ))
+            }
+        }
+    })
 }
