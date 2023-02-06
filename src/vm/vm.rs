@@ -60,6 +60,7 @@ impl VirtualMachine {
             ("list", ConstSymbol::BIN_LIST),
             ("car", ConstSymbol::BIN_CAR),
             ("cdr", ConstSymbol::BIN_CDR),
+            ("eval", ConstSymbol::BIN_EVAL),
         ];
 
         for (symbol, value) in primitives {

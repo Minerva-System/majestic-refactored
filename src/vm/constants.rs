@@ -148,4 +148,9 @@ impl ConstSymbol {
         tag: DataType::BuiltInFunction,
         value: 3,
     };
+
+    pub const BIN_EVAL: TypedPointer = TypedPointer {
+        tag: DataType::BuiltInFunction,
+        value: 4,
+    };
 }

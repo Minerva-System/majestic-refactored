@@ -15,6 +15,7 @@ impl VirtualMachine {
             ConstSymbol::BIN_CAR => builtin_car(self, argl),
             ConstSymbol::BIN_CDR => builtin_cdr(self, argl),
             ConstSymbol::BIN_LIST => builtin_list(self, argl),
+            ConstSymbol::BIN_EVAL => builtin_eval(self, argl),
             _ => Err(LispError::internal("unknown primitive function")),
         }
     }
@@ -77,4 +78,32 @@ fn builtin_list(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<Ty
     }
 
     Ok(iter)
+}
+
+fn builtin_eval(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<TypedPointer> {
+    trace!("builtin_eval");
+    if argl.len() != 1 {
+        return Err(LispError::arity("eval".to_owned()));
+    }
+
+    // Push stack frame
+    vm.stack_push(vm.registers.argl.clone())?;
+    vm.stack_push(vm.registers.cont.clone())?;
+    vm.stack_push(vm.registers.env.clone())?;
+    vm.stack_push(vm.registers.exp.clone())?;
+    vm.stack_push(vm.registers.fun.clone())?;
+    vm.stack_push(vm.registers.unev.clone())?;
+
+    // Evaluate
+    let val = vm.evaluate(argl[0].clone())?;
+
+    // Pop stack frame
+    vm.registers.unev = vm.stack_pop()?;
+    vm.registers.fun = vm.stack_pop()?;
+    vm.registers.exp = vm.stack_pop()?;
+    vm.registers.env = vm.stack_pop()?;
+    vm.registers.cont = vm.stack_pop()?;
+    vm.registers.argl = vm.stack_pop()?;
+
+    Ok(val)
 }

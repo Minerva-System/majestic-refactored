@@ -5,15 +5,25 @@ use super::error::{LispError, LispResult};
 use super::types::*;
 use log::{debug, trace};
 
+macro_rules! special_form_p {
+    ($vm:expr, $sym: expr) => {
+        EvalHelper::special_form_p(&$vm, $sym, $vm.registers.exp.clone())?
+    };
+}
+
 impl VirtualMachine {
     pub fn evaluate(&mut self, exp: TypedPointer) -> LispResult<TypedPointer> {
+        self.ev_pre_eval(exp);
+        self.ev_eval_dispatch()?;
+
+        Ok(self.registers.val.clone())
+    }
+
+    fn ev_pre_eval(&mut self, exp: TypedPointer) {
         self.registers.exp = exp;
         self.registers.env = ConstSymbol::E0;
         self.registers.cont = ConstSymbol::DONE;
         self.registers.val = TypedPointer::default();
-        self.ev_eval_dispatch()?;
-
-        Ok(self.registers.val.clone())
     }
 
     fn ev_eval_dispatch(&mut self) -> LispResult<()> {
@@ -28,16 +38,14 @@ impl VirtualMachine {
 
             _ => {
                 // Special Forms
-                if EvalHelper::special_form_p(&self, ConstSymbol::SETQ, exp.clone())? {
+                if special_form_p!(self, ConstSymbol::SETQ) {
                     self.ev_setq()
-                } else if EvalHelper::special_form_p(&self, ConstSymbol::QUOTE, exp.clone())? {
+                } else if special_form_p!(self, ConstSymbol::QUOTE) {
                     self.ev_quote()
-                } else if EvalHelper::special_form_p(&self, ConstSymbol::FN, exp.clone())? {
+                } else if special_form_p!(self, ConstSymbol::FN) {
                     self.ev_fn()
-                } else if EvalHelper::special_form_p(&self, ConstSymbol::DO, exp.clone())? {
-                    return Err(LispError::internal(
-                        "unimplemented evaluation for special form DO",
-                    ));
+                } else if special_form_p!(self, ConstSymbol::DO) {
+                    self.ev_do()
                 } else {
                     // Application
                     if EvalHelper::applicationp(&self, exp)? {
@@ -48,6 +56,12 @@ impl VirtualMachine {
                 }
             }
         }
+    }
+
+    fn ev_do(&mut self) -> LispResult<()> {
+        Err(LispError::internal(
+            "unimplemented evaluation for special form DO",
+        ))
     }
 
     fn ev_self_eval(&mut self) -> LispResult<()> {
