@@ -280,19 +280,19 @@ impl VirtualMachine {
         // apply primitive fn to list of arguments.
         // Invert ARGL into vector
         let argl = {
-            let mut v = Vec::new();
+            let mut v = VecDeque::new();
             let mut argl = argl.clone();
 
             while argl != ConstSymbol::NIL {
                 let car = self.get_car(&argl.clone())?;
                 argl = self.get_cdr(&argl.clone())?;
-                v.push(car);
+                v.push_front(car);
             }
 
             v
         };
 
-        self.dispatch_prim_eval(fun, &argl)
+        self.dispatch_prim_eval(fun, &argl.as_slices().0)
     }
 
     fn ev_make_bindings(

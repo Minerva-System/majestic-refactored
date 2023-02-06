@@ -69,7 +69,7 @@ fn builtin_cdr(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<Typ
 fn builtin_list(vm: &mut VirtualMachine, argl: &[TypedPointer]) -> LispResult<TypedPointer> {
     trace!("builtin_list");
     let mut iter = ConstSymbol::NIL;
-    for value in argl.iter() {
+    for value in argl.iter().rev() {
         let cons = vm.make_cons()?;
         vm.set_car(&cons, value.clone())?;
         vm.set_cdr(&cons, iter.clone())?;
