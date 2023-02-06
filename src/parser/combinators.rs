@@ -96,7 +96,6 @@ impl Combinators {
                 Expr::Comment(value)
             })
             .padded()
-            .labelled("comment")
     }
 
     // == COMBINED EXPRESSIONS & THE EXPRESSION PARSER ==
@@ -111,6 +110,17 @@ impl Combinators {
                 .collect::<Vec<Expr>>()
                 .map(Expr::List)
                 .labelled("list");
+
+            let dotted_list = expression
+                .clone()
+                .padded()
+                .repeated()
+                .then_ignore(just('.').padded())
+                .chain::<Expr, _, _>(expression.clone())
+                .delimited_by(just('('), just(')'))
+                .collect::<Vec<Expr>>()
+                .map(Expr::DottedList)
+                .labelled("dotted list");
 
             let cons = expression
                 .clone()
@@ -141,9 +151,9 @@ impl Combinators {
                 .map(|e| Expr::Prefixed(PrefixType::Quasiquote, Box::new(e.clone())))
                 .labelled("quasiquoted expression");
 
-            let unquoted_list = just(",@")
+            let unquoted_splice = just(",@")
                 .ignore_then(expression.clone())
-                .map(|e| Expr::Prefixed(PrefixType::UnquoteList, Box::new(e.clone())))
+                .map(|e| Expr::Prefixed(PrefixType::UnquoteSplice, Box::new(e.clone())))
                 .labelled("unquoted expression");
 
             let unquoted = just(',')
@@ -154,10 +164,11 @@ impl Combinators {
             Self::comment()
                 .or(quoted)
                 .or(quasiquoted)
-                .or(unquoted_list)
+                .or(unquoted_splice)
                 .or(unquoted)
                 .or(Self::atom())
                 .or(cons)
+                .or(dotted_list)
                 .or(list)
                 .or(vector)
                 .padded()

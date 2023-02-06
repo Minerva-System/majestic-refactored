@@ -1,64 +1,64 @@
 ;; -*- mode: lisp; mode: majestic; -*-
 
 ;; Add set
-(def eval.
+(def eval+
   (fn (exp env)
     (cond
      ((numberp exp) exp)
      ((stringp exp) exp)
      ((primitivep exp) exp)
      ((symbolp exp)
-      (lookup. exp env))
+      (lookup+ exp env))
      ((eq (first exp) 'quote)
       (second exp))
      ((eq (first exp) 'fn)
       (list 'closure (rest exp) env))
      ((eq (first exp) 'cond)
-      (evcond. (rest exp) env))
+      (evcond+ (rest exp) env))
      ((eq (first exp) 'def)
-      (define. (second exp) (third exp) env))
+      (define+ (second exp) (third exp) env))
      ((eq (first exp) 'do)
-      (first (last (evlist. (rest exp) env))))
+      (first (last (evlist+ (rest exp) env))))
      ((eq (first exp) 'apply)
       (apply (second exp) (third exp)))
-     (t (apply. (eval. (first exp) env)
-                (evlist. (rest exp) env))))))
+     (t (apply+ (eval+ (first exp) env)
+                (evlist+ (rest exp) env))))))
 
 ;; Review usage of "apply"
-(def apply.
+(def apply+
   (fn (proc args)
     (cond
      ((primitivep proc) (apply proc args))
      ((eq (first proc) 'closure)
-      (eval. (second (second proc))
-             (bind. (first (second proc))
+      (eval+ (second (second proc))
+             (bind+ (first (second proc))
                     args
                     (third proc))))
      (t (err "Undefined procedure: {}" proc)))))
 
-(def evlist.
+(def evlist+
   (fn (L env)
     (cond
      ((nilp L) nil)
-     (t (cons (eval. (first L) env)
-              (evlist. (rest L) env))))))
+     (t (cons (eval+ (first L) env)
+              (evlist+ (rest L) env))))))
 
-(def evcond.
+(def evcond+
   (fn (clauses env)
     (cond
      ((nilp clauses) nil)
      ((eq (first-of-first clauses) t)
-      (eval. (second (first clauses)) env))
-     ((nilp (eval. (first-of-first clauses) env))
-      (evcond. (rest clauses) env))
-     (t (eval. (second (first clauses)) env)))))
+      (eval+ (second (first clauses)) env))
+     ((nilp (eval+ (first-of-first clauses) env))
+      (evcond+ (rest clauses) env))
+     (t (eval+ (second (first clauses)) env)))))
 
-(def bind.
+(def bind+
   (fn (vars vals env)
-    (cons (pair-up. vars vals)
+    (cons (pair-up+ vars vals)
           env)))
 
-(def pair-up.
+(def pair-up+
   (fn (vars vals)
     (cond
      ((nilp vars)
@@ -68,45 +68,45 @@
       (err "Too few arguments"))
      (t (cons (cons (first vars)
                     (first vals))
-              (pair-up. (rest vars)
+              (pair-up+ (rest vars)
                         (rest vals)))))))
 
-(def unboundp.
+(def unboundp+
   (fn (x) (eq 'unbound-variable x)))
 
 ;; Simplify using recursion!
-(def lookup.
+(def lookup+
   (fn (sym env)
     ((fn (local-lookup)
        (cond
-        ((unboundp. local-lookup)
+        ((unboundp+ local-lookup)
          ((fn (global-lookup)
             (cond
-             ((unboundp. global-lookup)
+             ((unboundp+ global-lookup)
               (err "Unbound variable: {}" sym))
              (t global-lookup)))
-          (lookup-lexical. sym <E0>)))
+          (lookup-lexical+ sym <E0>)))
         (t local-lookup)))
-     (lookup-lexical. sym env))))
+     (lookup-lexical+ sym env))))
 
 ;; Lexical lookup
-(def lookup-lexical.
+(def lookup-lexical+
   (fn (sym env)
     (cond
      ((nilp env) 'unbound-variable)
      (t ((fn (vcell)
            (cond
             ((nilp vcell)
-             (lookup. sym (rest env)))
+             (lookup+ sym (rest env)))
             (t (rest vcell))))
-         (assq. sym (first env)))))))
+         (assq+ sym (first env)))))))
 
-(def assq.
+(def assq+
   (fn (sym alist)
     (cond ((nilp alist) nil)
           ((eq sym (first (first alist)))
            (first alist))
-          (t (assq. sym (rest alist))))))
+          (t (assq+ sym (rest alist))))))
 
 ;; Global environment
 (def <E0>
@@ -133,10 +133,10 @@
          (cons 'list           list))))
 
 ;; Extra
-(def define.
+(def define+
   (fn (sym val env)
     (if (symbolp sym)
-        (let ((val (eval. val env)))
+        (let ((val (eval+ val env)))
           (if (errorp val)
               val
             (do (set <E0> (cons (list (cons sym val))
@@ -151,7 +151,7 @@
   (mapc (fn (expression)
             (print "  > {}\n    {}"
                    expression
-                   (eval. expression nil)))
+                   (eval+ expression nil)))
         '(1
           (quote foo)
           (def *mynum* 7)

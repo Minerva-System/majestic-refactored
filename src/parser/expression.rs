@@ -1,4 +1,4 @@
-pub const RESERVED: &'static [char] = &['(', ')', '[', ']', '`', ',', '"', '@'];
+pub const RESERVED: &'static [char] = &['(', ')', '[', ']', '`', ',', '"', '@', '.'];
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum NumberExpr {
@@ -20,7 +20,7 @@ pub enum PrefixType {
     Quote,
     Quasiquote,
     Unquote,
-    UnquoteList,
+    UnquoteSplice,
 }
 
 #[derive(Debug, Clone, PartialEq)]
@@ -28,6 +28,7 @@ pub enum Expr {
     Atom(AtomExpr),
     Prefixed(PrefixType, Box<Expr>),
     List(Vec<Expr>),
+    DottedList(Vec<Expr>),
     Vector(Vec<Expr>),
     Cons(Box<Expr>, Box<Expr>),
     Comment(String),

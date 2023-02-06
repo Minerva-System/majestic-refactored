@@ -62,26 +62,122 @@ fn parse_fraction() {
     // TODO
 }
 
-// real numbers (light test)
+#[test]
+fn parse_real_numbers() {
+    let parser = Combinators::real().then_ignore(end());
+    let helper = |n| Ok(Expr::Atom(AtomExpr::Number(n)));
+
+    assert_eq!(helper(NumberExpr::Integer(200)), parser.parse("200"));
+    assert_eq!(helper(NumberExpr::Float(3.14)), parser.parse("3.14"));
+    assert_eq!(helper(NumberExpr::Fraction(2, 3)), parser.parse("2/3"));
+
+    assert!(parser.parse("5e").is_err());
+    assert!(parser.parse("e6").is_err());
+    assert!(parser.parse("72     *").is_err());
+    assert!(parser.parse("0.5.6").is_err());
+    assert!(parser.parse(".5").is_err());
+    assert!(parser.parse("-.5").is_err());
+    assert!(parser.parse("2.0/3.0").is_err());
+    assert!(parser.parse("5j1/3").is_err());
+}
 
 // complex numbers
+#[test]
+fn parse_complex_numbers() {
+    let parser = Combinators::complex().then_ignore(end());
+    let helper = |r, i| {
+        Ok(Expr::Atom(AtomExpr::Number(NumberExpr::Complex(
+            Box::new(r),
+            Box::new(i),
+        ))))
+    };
+
+    assert_eq!(
+        helper(NumberExpr::Integer(2), NumberExpr::Integer(3)),
+        parser.parse("2j3")
+    );
+    assert_eq!(
+        helper(NumberExpr::Integer(2), NumberExpr::Integer(3)),
+        parser.parse("2J3")
+    );
+
+    assert_eq!(
+        helper(NumberExpr::Float(3.5), NumberExpr::Integer(9)),
+        parser.parse("3.5j9")
+    );
+    assert_eq!(
+        helper(NumberExpr::Float(3.5), NumberExpr::Integer(9)),
+        parser.parse("3.5J9")
+    );
+    //unimplemented!();
+}
 
 // numbers (light test)
+#[test]
+fn parse_numbers() {
+    unimplemented!();
+}
 
 // symbols
+#[test]
+fn parse_symbols() {
+    unimplemented!();
+}
 
 // strings
+#[test]
+fn parse_string() {
+    unimplemented!();
+}
 
 // atoms
+#[test]
+fn parse_atom() {
+    unimplemented!();
+}
 
 // comments
+#[test]
+fn parse_comment() {
+    unimplemented!();
+}
 
 // expressions -- lists
+#[test]
+fn parse_expression_list() {
+    unimplemented!();
+}
 
 // expressions -- dotted lists (todo)
+#[test]
+fn parse_expression_dotted_list() {
+    unimplemented!();
+}
 
 // expressions -- cons
+#[test]
+fn parse_expression_cons() {
+    unimplemented!();
+}
 
 // expressions -- vectors
+#[test]
+fn parse_expression_vector() {
+    unimplemented!();
+}
 
 // expressions -- quote, quasiquote, unquote
+#[test]
+fn parse_expression_quote() {
+    unimplemented!();
+}
+
+#[test]
+fn parse_expression_quasiquote() {
+    unimplemented!();
+}
+
+#[test]
+fn parse_expression_unquote() {
+    unimplemented!();
+}
