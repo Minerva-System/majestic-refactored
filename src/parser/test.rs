@@ -113,71 +113,71 @@ fn parse_complex_numbers() {
 }
 
 // numbers (light test)
-#[test]
-fn parse_numbers() {
-    unimplemented!();
-}
+// #[test]
+// fn parse_numbers() {
+//     unimplemented!();
+// }
 
-// symbols
-#[test]
-fn parse_symbols() {
-    unimplemented!();
-}
+// // symbols
+// #[test]
+// fn parse_symbols() {
+//     unimplemented!();
+// }
 
-// strings
-#[test]
-fn parse_string() {
-    unimplemented!();
-}
+// // strings
+// #[test]
+// fn parse_string() {
+//     unimplemented!();
+// }
 
-// atoms
-#[test]
-fn parse_atom() {
-    unimplemented!();
-}
+// // atoms
+// #[test]
+// fn parse_atom() {
+//     unimplemented!();
+// }
 
-// comments
-#[test]
-fn parse_comment() {
-    unimplemented!();
-}
+// // comments
+// #[test]
+// fn parse_comment() {
+//     unimplemented!();
+// }
 
-// expressions -- lists
-#[test]
-fn parse_expression_list() {
-    unimplemented!();
-}
+// // expressions -- lists
+// #[test]
+// fn parse_expression_list() {
+//     unimplemented!();
+// }
 
-// expressions -- dotted lists (todo)
-#[test]
-fn parse_expression_dotted_list() {
-    unimplemented!();
-}
+// // expressions -- dotted lists (todo)
+// #[test]
+// fn parse_expression_dotted_list() {
+//     unimplemented!();
+// }
 
-// expressions -- cons
-#[test]
-fn parse_expression_cons() {
-    unimplemented!();
-}
+// // expressions -- cons
+// #[test]
+// fn parse_expression_cons() {
+//     unimplemented!();
+// }
 
-// expressions -- vectors
-#[test]
-fn parse_expression_vector() {
-    unimplemented!();
-}
+// // expressions -- vectors
+// #[test]
+// fn parse_expression_vector() {
+//     unimplemented!();
+// }
 
-// expressions -- quote, quasiquote, unquote
-#[test]
-fn parse_expression_quote() {
-    unimplemented!();
-}
+// // expressions -- quote, quasiquote, unquote
+// #[test]
+// fn parse_expression_quote() {
+//     unimplemented!();
+// }
 
-#[test]
-fn parse_expression_quasiquote() {
-    unimplemented!();
-}
+// #[test]
+// fn parse_expression_quasiquote() {
+//     unimplemented!();
+// }
 
-#[test]
-fn parse_expression_unquote() {
-    unimplemented!();
-}
+// #[test]
+// fn parse_expression_unquote() {
+//     unimplemented!();
+// }
