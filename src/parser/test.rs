@@ -100,7 +100,6 @@ fn parse_complex_numbers() {
         helper(NumberExpr::Integer(2), NumberExpr::Integer(3)),
         parser.parse("2J3")
     );
-
     assert_eq!(
         helper(NumberExpr::Float(3.5), NumberExpr::Integer(9)),
         parser.parse("3.5j9")
@@ -109,14 +108,31 @@ fn parse_complex_numbers() {
         helper(NumberExpr::Float(3.5), NumberExpr::Integer(9)),
         parser.parse("3.5J9")
     );
-    //unimplemented!();
+
+    assert!(parser.parse("j3").is_err());
+    assert!(parser.parse("5j").is_err());
+    assert!(parser.parse("2jj9").is_err());
+    assert!(parser.parse("5j4j3").is_err());
 }
 
 // numbers (light test)
-// #[test]
-// fn parse_numbers() {
-//     unimplemented!();
-// }
+#[test]
+fn parse_numbers() {
+    let parser = Combinators::number().then_ignore(end());
+
+    let helper = |v| Ok(Expr::Atom(AtomExpr::Number(v)));
+
+    assert_eq!(helper(NumberExpr::Integer(2)), parser.parse("2"));
+    assert_eq!(helper(NumberExpr::Float(3.14)), parser.parse("3.14"));
+    assert_eq!(helper(NumberExpr::Fraction(5, 3)), parser.parse("5/3"));
+    assert_eq!(
+        helper(NumberExpr::Complex(
+            Box::new(NumberExpr::Integer(10)),
+            Box::new(NumberExpr::Fraction(6, 29))
+        )),
+        parser.parse("10j6/29")
+    );
+}
 
 // // symbols
 // #[test]
