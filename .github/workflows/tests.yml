@@ -41,7 +41,7 @@ jobs:
           RUSTFLAGS: -D warnings
 
       - name: Tests | Run unit tests
-        uses: actions-rs/tarpaulin@v1.0
+        uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.22.0'
           args: '--skip-clean -t 1200 --out Lcov -- --test-threads 1'
