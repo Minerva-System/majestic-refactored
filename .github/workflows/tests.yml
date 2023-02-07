@@ -36,7 +36,7 @@ jobs:
         run: cargo fmt -- --check
 
       - name: Analysis | Clippy
-        run: cargo clippy -- -D clippy::all &> ./clippy.report
+        run: cargo clippy --message-format=json -- -D clippy::all &> ./clippy.json
         continue-on-error: true
         env:
           RUSTFLAGS: -D warnings
