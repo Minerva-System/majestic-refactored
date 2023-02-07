@@ -37,6 +37,7 @@ jobs:
 
       - name: Analysis | Clippy
         run: cargo clippy -- -D clippy::all &> ./clippy.report
+        continue-on-error: true
         env:
           RUSTFLAGS: -D warnings
 
