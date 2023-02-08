@@ -150,17 +150,68 @@ fn parse_symbols() {
     assert!(parser.parse("123foo").is_err());
 }
 
-// // strings
-// #[test]
-// fn parse_string() {
-//     unimplemented!();
-// }
+// strings
+#[test]
+fn parse_string() {
+    let parser = Combinators::string().then_ignore(end());
 
-// // atoms
-// #[test]
-// fn parse_atom() {
-//     unimplemented!();
-// }
+    let helper = |v: &str| Ok(Expr::Atom(AtomExpr::String(v.to_owned())));
+
+    assert_eq!(helper("hello"), parser.parse("\"hello\""));
+    assert_eq!(
+        helper(&format!("hello,\nworld")),
+        parser.parse(format!("\"hello,\nworld\""))
+    );
+
+    assert!(parser.parse("\"hello my friend").is_err());
+    assert!(parser.parse("hello my friend\"").is_err());
+}
+
+// atoms
+#[test]
+fn parse_atom() {
+    let parser = Combinators::atom().then_ignore(end());
+
+    let number_helper = |v| Ok(Expr::Atom(AtomExpr::Number(v)));
+    let symbol_helper = |v: &str| Ok(Expr::Atom(AtomExpr::Symbol(v.to_owned())));
+    let string_helper = |v: &str| Ok(Expr::Atom(AtomExpr::String(v.to_owned())));
+
+    assert_eq!(number_helper(NumberExpr::Integer(0)), parser.parse("0"));
+    assert_eq!(number_helper(NumberExpr::Float(2.66)), parser.parse("2.66"));
+    assert_eq!(
+        number_helper(NumberExpr::Fraction(9, 12)),
+        parser.parse("9/12")
+    );
+    assert_eq!(
+        number_helper(NumberExpr::Complex(
+            Box::new(NumberExpr::Float(5.98)),
+            Box::new(NumberExpr::Float(27.9))
+        )),
+        parser.parse("5.98J27.9")
+    );
+    assert_eq!(symbol_helper("bah"), parser.parse("bah"));
+    assert_eq!(symbol_helper("*blah*"), parser.parse("*blah*"));
+    assert_eq!(symbol_helper("+test+"), parser.parse("+test+"));
+    assert_eq!(symbol_helper("eval"), parser.parse("eval"));
+    assert_eq!(symbol_helper("lalala456"), parser.parse("lalala456"));
+    assert_eq!(string_helper("how"), parser.parse("\"how\""));
+    assert_eq!(
+        string_helper(&format!("how\nare you?")),
+        parser.parse(format!("\"how\nare you?\""))
+    );
+
+    assert!(parser.parse("5e").is_err());
+    assert!(parser.parse("123foo").is_err());
+    assert!(parser.parse("0.5.6").is_err());
+    assert!(parser.parse(".5").is_err());
+    assert!(parser.parse("-.5").is_err());
+    assert!(parser.parse("2.0/3.0").is_err());
+    assert!(parser.parse("5j").is_err());
+    assert!(parser.parse("2jj9").is_err());
+    assert!(parser.parse("5j4j3").is_err());
+    assert!(parser.parse("\"hello my friend").is_err());
+    assert!(parser.parse("hello my friend\"").is_err());
+}
 
 // // comments
 // #[test]
@@ -174,7 +225,7 @@ fn parse_symbols() {
 //     unimplemented!();
 // }
 
-// // expressions -- dotted lists (todo)
+// // expressions -- dotted lists
 // #[test]
 // fn parse_expression_dotted_list() {
 //     unimplemented!();
