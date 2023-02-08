@@ -134,11 +134,21 @@ fn parse_numbers() {
     );
 }
 
-// // symbols
-// #[test]
-// fn parse_symbols() {
-//     unimplemented!();
-// }
+// symbols
+#[test]
+fn parse_symbols() {
+    let parser = Combinators::symbol().then_ignore(end());
+
+    let helper = |v: &str| Ok(Expr::Atom(AtomExpr::Symbol(v.to_owned())));
+
+    assert_eq!(helper("foo"), parser.parse("foo"));
+    assert_eq!(helper("*test*"), parser.parse("*test*"));
+    assert_eq!(helper("+bar+"), parser.parse("+bar+"));
+    assert_eq!(helper("setq"), parser.parse("setq"));
+    assert_eq!(helper("baz123"), parser.parse("baz123"));
+
+    assert!(parser.parse("123foo").is_err());
+}
 
 // // strings
 // #[test]
