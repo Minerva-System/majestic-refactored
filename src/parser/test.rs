@@ -467,10 +467,77 @@ fn parse_expression_quote() {
     assert!(parser.parse("'(foo . (bar .))").is_err());
     assert!(parser.parse("'(foo .)").is_err());
     assert!(parser.parse("'(. quux)").is_err());
+    assert!(parser.parse("'").is_err());
 }
 
-// #[test]
-// fn parse_expression_quasiquote_unquote() {
-//     unimplemented!();
-// }
- 
+// expressions -- quasiquote, unquote & unquote-splice
+#[test]
+fn parse_expression_quasiquote_unquote() {
+    let parser = Combinators::expression().then_ignore(end());
+
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let list_helper = |v: Vec<Expr>| Expr::List(v);
+    let qquote_helper = |v| Expr::Prefixed(PrefixType::Quasiquote, Box::new(v));
+    let uquote_helper = |v| Expr::Prefixed(PrefixType::Unquote, Box::new(v));
+    let uspquote_helper = |v| Expr::Prefixed(PrefixType::UnquoteSplice, Box::new(v));
+
+    assert_eq!(
+        Ok(qquote_helper(list_helper(vec![
+            symbol_helper("foo"),
+            symbol_helper("bar")
+        ]))),
+        parser.parse("`(foo bar)")
+    );
+
+    assert_eq!(
+        Ok(uquote_helper(list_helper(vec![
+            symbol_helper("foo"),
+            symbol_helper("bar")
+        ]))),
+        parser.parse(",(foo bar)")
+    );
+
+    assert_eq!(
+        Ok(uspquote_helper(list_helper(vec![
+            symbol_helper("foo"),
+            symbol_helper("bar")
+        ]))),
+        parser.parse(",@(foo bar)")
+    );
+
+    assert_eq!(
+        Ok(list_helper(vec![
+            symbol_helper("defn"),
+            symbol_helper("hello"),
+            list_helper(vec![symbol_helper("name")]),
+            list_helper(vec![
+                symbol_helper("if"),
+                list_helper(vec![symbol_helper("consp"), symbol_helper("name")]),
+                qquote_helper(list_helper(vec![
+                    symbol_helper("good"),
+                    symbol_helper("morning"),
+                    uspquote_helper(symbol_helper("name")),
+                ])),
+                qquote_helper(list_helper(vec![
+                    symbol_helper("good"),
+                    symbol_helper("morning"),
+                    uquote_helper(symbol_helper("name"))
+                ])),
+            ]),
+        ])),
+        parser.parse(
+            "(defn hello (name)\
+	       (if (consp name)\
+	         `(good morning ,@name)\
+	         `(good morning ,name)))"
+        )
+    );
+
+    assert!(parser.parse("`(1 2 3").is_err());
+    assert!(parser.parse("(1 2 3 ,)").is_err());
+    assert!(parser.parse("(1 2 3 `)").is_err());
+    assert!(parser.parse("(1 2 3 ,@)").is_err());
+    assert!(parser.parse("`").is_err());
+    assert!(parser.parse(",").is_err());
+    assert!(parser.parse(",@").is_err());
+}
