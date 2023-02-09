@@ -370,18 +370,107 @@ fn parse_expression_vector() {
     assert!(parser.parse("[foo bar baz").is_err());
 }
 
-// // expressions -- quote, quasiquote, unquote
-// #[test]
-// fn parse_expression_quote() {
-//     unimplemented!();
-// }
+// expressions -- quote
+#[test]
+fn parse_expression_quote() {
+    let parser = Combinators::expression().then_ignore(end());
+
+    let number_helper = |v| Expr::Atom(AtomExpr::Number(v));
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let list_helper = |v: Vec<Expr>| Expr::List(v);
+    let dlist_helper = |v: Vec<Expr>| Expr::DottedList(v);
+    let cons_helper = |car, cdr| Expr::Cons(Box::new(car), Box::new(cdr));
+    let quote_helper = |v| Expr::Prefixed(PrefixType::Quote, Box::new(v));
+
+    assert_eq!(
+        Ok(quote_helper(list_helper(vec![
+            number_helper(NumberExpr::Integer(1)),
+            number_helper(NumberExpr::Integer(2)),
+            number_helper(NumberExpr::Integer(3))
+        ]))),
+        parser.parse("'(1 2 3)")
+    );
+
+    assert_eq!(
+        Ok(quote_helper(list_helper(vec![
+            symbol_helper("a"),
+            symbol_helper("b"),
+            symbol_helper("c")
+        ]))),
+        parser.parse("'(a b c)")
+    );
+
+    assert_eq!(Ok(quote_helper(list_helper(vec![]))), parser.parse("'()"));
+
+    assert_eq!(
+        Ok(quote_helper(list_helper(vec![
+            symbol_helper("defn"),
+            symbol_helper("square"),
+            list_helper(vec![symbol_helper("x")]),
+            list_helper(vec![
+                symbol_helper("*"),
+                symbol_helper("x"),
+                symbol_helper("x")
+            ])
+        ]))),
+        parser.parse("'(defn square (x) (* x x))")
+    );
+
+    assert_eq!(
+        Ok(quote_helper(dlist_helper(vec![
+            number_helper(NumberExpr::Integer(1)),
+            number_helper(NumberExpr::Integer(2)),
+            number_helper(NumberExpr::Integer(3))
+        ]))),
+        parser.parse("'(1 2 . 3)")
+    );
+
+    assert_eq!(
+        Ok(quote_helper(dlist_helper(vec![
+            symbol_helper("a"),
+            symbol_helper("b"),
+            symbol_helper("c")
+        ]))),
+        parser.parse("'(a b . c)")
+    );
+
+    assert_eq!(
+        Ok(quote_helper(cons_helper(
+            number_helper(NumberExpr::Integer(5)),
+            number_helper(NumberExpr::Float(3.5))
+        ))),
+        parser.parse("'(5 . 3.5)")
+    );
+    assert_eq!(
+        Ok(quote_helper(cons_helper(
+            symbol_helper("baz"),
+            symbol_helper("quux")
+        ))),
+        parser.parse("'(baz . quux)")
+    );
+    assert_eq!(
+        Ok(quote_helper(cons_helper(
+            symbol_helper("foo"),
+            cons_helper(
+                symbol_helper("bar"),
+                cons_helper(symbol_helper("baz"), symbol_helper("nil"))
+            )
+        ))),
+        parser.parse("'(foo . (bar . (baz . nil)))")
+    );
+
+    assert!(parser.parse("'(1 2 3 4").is_err());
+    assert!(parser.parse("'(foo bar baz").is_err());
+    assert!(parser.parse("'(1 2 3 . 4").is_err());
+    assert!(parser.parse("'(foo bar . baz").is_err());
+    assert!(parser.parse("'(foo . bar").is_err());
+    assert!(parser.parse("'(foo . (bar .))").is_err());
+    assert!(parser.parse("'(foo .)").is_err());
+    assert!(parser.parse("'(. quux)").is_err());
+}
 
 // #[test]
-// fn parse_expression_quasiquote() {
+// fn parse_expression_quasiquote_unquote() {
 //     unimplemented!();
 // }
-
-// #[test]
-// fn parse_expression_unquote() {
-//     unimplemented!();
-// }
+ 
