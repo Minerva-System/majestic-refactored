@@ -115,6 +115,7 @@ impl Combinators {
                 .clone()
                 .padded()
                 .repeated()
+                .at_least(1)
                 .then_ignore(just('.').padded())
                 .chain::<Expr, _, _>(expression.clone())
                 .delimited_by(just('('), just(')'))
