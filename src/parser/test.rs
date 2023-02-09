@@ -22,7 +22,6 @@ fn parse_float() {
     use float_cmp::approx_eq;
 
     let parser = Combinators::float().then_ignore(end());
-    //let helper = |i: f64| Ok(Expr::Atom(AtomExpr::Number(NumberExpr::Float(i))));
 
     let test_parser = |num, text| {
         let parsed = parser.parse(text);
@@ -337,11 +336,39 @@ fn parse_expression_cons() {
     assert!(parser.parse("(. quux)").is_err());
 }
 
-// // expressions -- vectors
-// #[test]
-// fn parse_expression_vector() {
-//     unimplemented!();
-// }
+// expressions -- vectors
+#[test]
+fn parse_expression_vector() {
+    let parser = Combinators::expression().then_ignore(end());
+
+    let number_helper = |v| Expr::Atom(AtomExpr::Number(v));
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let vector_helper = |v: Vec<Expr>| Expr::Vector(v);
+
+    assert_eq!(
+        Ok(vector_helper(vec![
+            number_helper(NumberExpr::Integer(1)),
+            number_helper(NumberExpr::Integer(2)),
+            number_helper(NumberExpr::Integer(3))
+        ])),
+        parser.parse("[1 2 3]")
+    );
+
+    assert_eq!(
+        Ok(vector_helper(vec![
+            symbol_helper("a"),
+            symbol_helper("b"),
+            symbol_helper("c")
+        ])),
+        parser.parse("[a b c]")
+    );
+
+    assert_eq!(Ok(vector_helper(vec![])), parser.parse("[]"));
+
+    assert!(parser.parse("[1 2 3 4").is_err());
+    assert!(parser.parse("1 2 3 4]").is_err());
+    assert!(parser.parse("[foo bar baz").is_err());
+}
 
 // // expressions -- quote, quasiquote, unquote
 // #[test]
