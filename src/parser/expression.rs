@@ -1,4 +1,4 @@
-pub const RESERVED: &'static [char] = &['(', ')', '[', ']', '`', ',', '"', '@', '.'];
+pub const RESERVED: &'static [char] = &['(', ')', '[', ']', '\'', '`', ',', '"', '@', '.'];
 
 #[derive(Debug, Clone, PartialEq)]
 pub enum NumberExpr {
