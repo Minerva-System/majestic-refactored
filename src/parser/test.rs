@@ -15,7 +15,6 @@ fn parse_integer() {
     assert!(parser.parse("5e").is_err());
     assert!(parser.parse("e6").is_err());
     assert!(parser.parse("72     *").is_err());
-    // TODO
 }
 
 #[test]
@@ -44,7 +43,6 @@ fn parse_float() {
     assert!(parser.parse("0.5.6").is_err());
     assert!(parser.parse(".5").is_err());
     assert!(parser.parse("-.5").is_err());
-    // TODO
 }
 
 #[test]
@@ -59,7 +57,6 @@ fn parse_fraction() {
 
     assert!(parser.parse("2.0/3.0").is_err());
     assert!(parser.parse("5j1/3").is_err());
-    // TODO
 }
 
 #[test]
@@ -213,29 +210,132 @@ fn parse_atom() {
     assert!(parser.parse("hello my friend\"").is_err());
 }
 
-// // comments
-// #[test]
-// fn parse_comment() {
-//     unimplemented!();
-// }
+// comments
+#[test]
+fn parse_comment() {
+    let parser = Combinators::comment().then_ignore(end());
 
-// // expressions -- lists
-// #[test]
-// fn parse_expression_list() {
-//     unimplemented!();
-// }
+    assert!(parser.parse("; this is a comment\n").is_ok());
+    assert!(parser.parse(";; this is another comment\n").is_ok());
+}
 
-// // expressions -- dotted lists
-// #[test]
-// fn parse_expression_dotted_list() {
-//     unimplemented!();
-// }
+// expressions -- lists
+#[test]
+fn parse_expression_list() {
+    let parser = Combinators::expression().then_ignore(end());
 
-// // expressions -- cons
-// #[test]
-// fn parse_expression_cons() {
-//     unimplemented!();
-// }
+    let number_helper = |v| Expr::Atom(AtomExpr::Number(v));
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let list_helper = |v: Vec<Expr>| Expr::List(v);
+
+    assert_eq!(
+        Ok(list_helper(vec![
+            number_helper(NumberExpr::Integer(1)),
+            number_helper(NumberExpr::Integer(2)),
+            number_helper(NumberExpr::Integer(3))
+        ])),
+        parser.parse("(1 2 3)")
+    );
+
+    assert_eq!(
+        Ok(list_helper(vec![
+            symbol_helper("a"),
+            symbol_helper("b"),
+            symbol_helper("c")
+        ])),
+        parser.parse("(a b c)")
+    );
+
+    assert_eq!(Ok(list_helper(vec![])), parser.parse("()"));
+
+    assert_eq!(
+        Ok(list_helper(vec![
+            symbol_helper("defn"),
+            symbol_helper("square"),
+            list_helper(vec![symbol_helper("x")]),
+            list_helper(vec![
+                symbol_helper("*"),
+                symbol_helper("x"),
+                symbol_helper("x")
+            ])
+        ])),
+        parser.parse("(defn square (x) (* x x))")
+    );
+
+    assert!(parser.parse("(1 2 3 4").is_err());
+    assert!(parser.parse("1 2 3 4)").is_err());
+    assert!(parser.parse("(foo bar baz").is_err());
+}
+
+// expressions -- dotted lists
+#[test]
+fn parse_expression_dotted_list() {
+    let parser = Combinators::expression().then_ignore(end());
+
+    let number_helper = |v| Expr::Atom(AtomExpr::Number(v));
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let dlist_helper = |v: Vec<Expr>| Expr::DottedList(v);
+
+    assert_eq!(
+        Ok(dlist_helper(vec![
+            number_helper(NumberExpr::Integer(1)),
+            number_helper(NumberExpr::Integer(2)),
+            number_helper(NumberExpr::Integer(3))
+        ])),
+        parser.parse("(1 2 . 3)")
+    );
+
+    assert_eq!(
+        Ok(dlist_helper(vec![
+            symbol_helper("a"),
+            symbol_helper("b"),
+            symbol_helper("c")
+        ])),
+        parser.parse("(a b . c)")
+    );
+
+    assert!(parser.parse("(1 2 3 . 4").is_err());
+    assert!(parser.parse("(1 2 . . 3 4)").is_err());
+    assert!(parser.parse("1 2 3 . 4)").is_err());
+    assert!(parser.parse("(foo bar . baz").is_err());
+}
+
+// expressions -- cons
+#[test]
+fn parse_expression_cons() {
+    let parser = Combinators::expression().then_ignore(end());
+
+    let number_helper = |v| Expr::Atom(AtomExpr::Number(v));
+    let symbol_helper = |v: &str| Expr::Atom(AtomExpr::Symbol(v.to_owned()));
+    let cons_helper = |car, cdr| Expr::Cons(Box::new(car), Box::new(cdr));
+
+    assert_eq!(
+        Ok(cons_helper(
+            number_helper(NumberExpr::Integer(5)),
+            number_helper(NumberExpr::Float(3.5))
+        )),
+        parser.parse("(5 . 3.5)")
+    );
+    assert_eq!(
+        Ok(cons_helper(symbol_helper("baz"), symbol_helper("quux"))),
+        parser.parse("(baz . quux)")
+    );
+    assert_eq!(
+        Ok(cons_helper(
+            symbol_helper("foo"),
+            cons_helper(
+                symbol_helper("bar"),
+                cons_helper(symbol_helper("baz"), symbol_helper("nil"))
+            )
+        )),
+        parser.parse("(foo . (bar . (baz . nil)))")
+    );
+
+    assert!(parser.parse("(foo . bar").is_err());
+    assert!(parser.parse("(foo . (bar .))").is_err());
+    assert!(parser.parse("(foo .)").is_err());
+    assert!(parser.parse("(. quux)").is_err());
+}
 
 // // expressions -- vectors
 // #[test]
