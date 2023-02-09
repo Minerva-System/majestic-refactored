@@ -1,37 +1,47 @@
 use crate::vm::*;
 
 pub fn print_object(vm: &VirtualMachine, ptr: &TypedPointer) {
+    print!("{}", format_object(vm, ptr));
+}
+
+pub fn format_object(vm: &VirtualMachine, ptr: &TypedPointer) -> String {
     match ptr.tag {
-        DataType::Undefined => print!("undefined"),
-        DataType::Number => print!("{}", vm.numbers.area[ptr.value]),
-        DataType::Atom => print!("{}", vm.atoms.area[ptr.value].name),
-        DataType::Function => print!("#<FUNCTION {{{:#08x}}}>", ptr.value),
-        DataType::Literal => print!("#<LITERAL {{{:#08x}}}>", ptr.value),
-        DataType::BuiltInFunction => print!("#<BUILTIN-FUNCTION {{{:#08x}}}>", ptr.value),
-        DataType::BuiltInLiteral => print!("#<BUILTIN-LITERAL {{{:#08x}}}>", ptr.value),
-        DataType::Environment => print!("#<ENV{}>", ptr.value),
+        DataType::Undefined => format!("undefined"),
+        DataType::Number => format!("{}", vm.numbers.area[ptr.value]),
+        DataType::Atom => format!("{}", vm.atoms.area[ptr.value].name),
+        DataType::Function => format!("#<FUNCTION {{{:#08x}}}>", ptr.value),
+        DataType::Literal => format!("#<LITERAL {{{:#08x}}}>", ptr.value),
+        DataType::BuiltInFunction => format!("#<BUILTIN-FUNCTION {{{:#08x}}}>", ptr.value),
+        DataType::BuiltInLiteral => format!("#<BUILTIN-LITERAL {{{:#08x}}}>", ptr.value),
+        DataType::Environment => format!("#<ENV{}>", ptr.value),
         DataType::Cons => {
-            print!("(");
-            print_list(&vm, &ptr);
+            let mut s: String = String::new();
+            s.push('(');
+            s.push_str(&format_list(&vm, &ptr));
+            s
         }
     }
 }
 
-pub fn print_list(vm: &VirtualMachine, ptr: &TypedPointer) {
+pub fn format_list(vm: &VirtualMachine, ptr: &TypedPointer) -> String {
     let car = &vm.lists.area[ptr.value].car;
     let cdr = &vm.lists.area[ptr.value].cdr;
 
-    print_object(&vm, car);
+    let mut s: String = String::new();
+
+    s.push_str(&format_object(&vm, car));
 
     if cdr.tag == DataType::Cons {
-        print!(" ");
-        print_list(&vm, cdr);
+        s.push(' ');
+        s.push_str(&format_list(&vm, cdr));
     } else if (cdr.tag == DataType::Atom) && (cdr.value == 0) {
         // Trick for checking for nil
-        print!(")");
+        s.push(')');
     } else {
-        print!(" . ");
-        print_object(&vm, cdr);
-        print!(")");
+        s.push_str(" . ");
+        s.push_str(&format_object(&vm, cdr));
+        s.push(')');
     }
+
+    s
 }
