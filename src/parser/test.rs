@@ -541,3 +541,12 @@ fn parse_expression_quasiquote_unquote() {
     assert!(parser.parse(",").is_err());
     assert!(parser.parse(",@").is_err());
 }
+
+#[test]
+fn parse_many_expressions() {
+    let parser = Combinators::parser();
+
+    assert!(parser
+        .parse("1 2 3 test foo '(foo bar) [5 6] `(foo ,(eval bar) ,@(eval '(list '+ 1 2)))")
+        .is_ok());
+}
