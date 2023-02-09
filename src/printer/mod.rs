@@ -1,5 +1,8 @@
 use crate::vm::*;
 
+#[cfg(test)]
+mod test;
+
 pub fn print_object(vm: &VirtualMachine, ptr: &TypedPointer) {
     print!("{}", format_object(vm, ptr));
 }
