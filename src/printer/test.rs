@@ -23,7 +23,14 @@ fn format_numbers() {
     assert_eq!(gen_format(&mut vm, "3j4"), "3J4");
 }
 
-// atoms
+#[test]
+fn format_atoms() {
+    let mut vm = VirtualMachine::default();
+    assert_eq!(gen_format(&mut vm, "foo"), "foo");
+    assert_eq!(gen_format(&mut vm, "foo-bar"), "foo-bar");
+    assert_eq!(gen_format(&mut vm, "*baz*"), "*baz*");
+}
+
 // functions
 // literals
 // built-in functions
