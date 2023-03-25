@@ -3,7 +3,7 @@ pipeline {
   stages {
     stage('Build') {
       steps {
-        sh 'source ~/.cargo/env && cargo build'
+        sh '/bin/bash -c "cargo build"'
       }
     }
 
