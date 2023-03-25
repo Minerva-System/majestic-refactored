@@ -1,7 +1,9 @@
 podTemplate(containers: [
 	containerTemplate(
-		name: 'rust-builder',
-		image: 'rust:1.68.1-alpine'
+		name: 'rust',
+		image: 'rust:1.68.1-alpine',
+		command: 'sleep',
+		args: '30d'
 	)
 ]) {
 	node(POD_LABEL) {
