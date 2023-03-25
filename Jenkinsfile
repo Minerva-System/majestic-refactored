@@ -11,7 +11,7 @@ podTemplate(containers: [
 			container('rust') {
 				stage('Clone project') {
 					git 'https://github.com/Minerva-System/majestic-refactored'
-					sh 'cd majestic-refactored'
+					sh 'ls'
 				}
 				stage('Build') {
 					sh 'cargo build --release'
