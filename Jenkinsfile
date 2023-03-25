@@ -8,7 +8,7 @@ podTemplate(containers: [
 ]) {
 	node(POD_LABEL) {
 		stage('Rust project build') {
-			container('rust-builder') {
+			container('rust') {
 				stage('Clone project') {
 					git 'https://github.com/Minerva-System/majestic-refactored'
 					sh 'cd majestic-refactored'
