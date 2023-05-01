@@ -15,6 +15,14 @@ jobs:
     runs-on: ubuntu-latest
     environment: automated-tests
     steps:
+      - name: Setup | Connect to Tailnet
+        uses: tailscale/github-action@main
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+
+      - name: Setup | Test connection to SonarQube server
+        run: curl -X GET ${{ secrets.SONAR_HOST_URL }} -v --connect-timeout 5
+          
       - name: Setup | Checkout repo
         uses: actions/checkout@v3
         with:
@@ -46,11 +54,6 @@ jobs:
         with:
           version: '0.22.0'
           args: '--skip-clean -t 1200 --out Lcov -- --test-threads 1'
-
-      - name: Setup | Connect to Tailnet
-        uses: tailscale/github-action@main
-        with:
-          authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
       - name: Setup | Remove unused files
         run: rm -f ./cobertura.xml
