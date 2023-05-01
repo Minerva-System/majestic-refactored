@@ -19,9 +19,7 @@ jobs:
         uses: tailscale/github-action@main
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-
-      - name: Setup | Test connection to SonarQube server
-        run: curl -X GET ${{ secrets.SONAR_HOST_URL }} -v --connect-timeout 5
+          version: '1.40.0'
           
       - name: Setup | Checkout repo
         uses: actions/checkout@v3
