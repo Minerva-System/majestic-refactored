@@ -1,10 +1,16 @@
 [package]
-name = "majestic-refactored"
+name = "majestic"
 version = "0.0.0"
 edition = "2021"
 build = "build.rs"
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "majestic"
+path = "src/lib.rs"
+
+[[bin]]
+name = "majestic"
+path = "src/bin/majestic.rs"
 
 [build-dependencies]
 chrono = "0.4.23"

@@ -4,18 +4,14 @@ static TARGET: &'static str = include_str!(concat!(env!("OUT_DIR"), "/target.txt
 
 use colored::*;
 use log::{debug, error, info};
+use majestic::{parser, printer, vm};
 use rustyline::error::ReadlineError;
 use rustyline::validate::{ValidationContext, ValidationResult, Validator};
 use rustyline::Editor;
 use rustyline_derive::{Completer, Helper, Highlighter, Hinter};
 
-mod parser;
-mod printer;
-mod vm;
-
 use parser::combinators::Combinators;
-
-use crate::vm::VirtualMachine;
+use vm::VirtualMachine;
 
 fn load_log_config() {
     let mut cfg = std::env::current_dir().unwrap();
