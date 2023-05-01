@@ -23,7 +23,7 @@ jobs:
       - name: Setup | Install Rust toolchain
         uses: actions-rs/toolchain@v1.0.6
         with:
-          toolchain: 1.65.0
+          toolchain: 1.67.1
           components: clippy, rustfmt
           
       - name: Setup | Rust build cache
@@ -41,7 +41,7 @@ jobs:
         env:
           RUSTFLAGS: -D warnings
 
-      - name: Tests | Run unit tests
+      - name: Tests | Run unit and integration tests
         uses: actions-rs/tarpaulin@v0.1
         with:
           version: '0.22.0'
