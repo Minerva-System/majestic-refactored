@@ -19,7 +19,7 @@ podTemplate(containers: [
 
 		stage('Empacotamento') {
 		    sh '''
-                        cp target/release/majestic-refactored majestic
+                        cp target/release/majestic majestic
                         MAJESTIC_VERSION=`grep version Cargo.toml | awk '{print $3}' | tr -d '"'`
                         tar -czvf "majestic-${MAJESTIC_VERSION}.tar.gz" majestic
                         rm majestic
