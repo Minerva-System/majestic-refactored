@@ -54,6 +54,7 @@ fn convert_ast_atom() {
 fn convert_ast_list() {
     let mut vm = vm::VirtualMachine::new();
     generate_ast_test!(vm, "(1 2 3)");
+    generate_ast_test!(vm, "()", "nil");
 }
 
 // dotted list
