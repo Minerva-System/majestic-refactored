@@ -1,45 +1,10 @@
 //! Test module for building proper ASTs on a VM, by leveraging an AST built by
 //! the parser.
 
-use majestic::{
-    parser::{combinators, convert, expression},
-    printer, vm,
-};
+use majestic::vm;
 
-/// Helper function to produce an expression from a fixed expression in text form.
-/// Panics when the expression contains syntax errors, and returns only the first
-/// parsed expression.
-fn get_expression(text: &str) -> expression::Expr {
-    use chumsky::Parser;
-
-    let (parsed, errs) = combinators::Combinators::parser().parse_recovery(text);
-    if !errs.is_empty() {
-        panic!("Given expression contains syntax errors");
-    }
-    parsed
-        .expect("Parsed expression")
-        .first()
-        .expect("First expression")
-        .to_owned()
-}
-
-macro_rules! generate_ast_test {
-    ($vm:ident, $text:expr) => {
-        generate_ast_test!($vm, $text, $text);
-    };
-
-    ($vm:ident, $text:expr, $expected:expr) => {{
-        // Get parsed expression as a Rust-like syntax tree
-        let expr = get_expression($text);
-
-        // Try building a syntax tree withing the virtual machine
-        let pointer = convert::build_ast(&mut $vm, expr)
-            .expect("Typed pointer to AST within virtual machine");
-
-        // Check whether the printed expression is equal to the input text
-        assert_eq!($expected, printer::format_object(&$vm, &pointer));
-    }};
-}
+use crate::util::*;
+use crate::*;
 
 // atom
 #[test]
