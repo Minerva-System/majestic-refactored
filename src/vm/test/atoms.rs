@@ -52,8 +52,6 @@ fn self_eval_atoms() -> LispResult<()> {
     Ok(())
 }
 
-// assign number to atom, then assign new number, effectively
-// copying it to the same number slot
 #[test]
 fn reassign_number() -> LispResult<()> {
     let mut vm = VirtualMachine::new();
@@ -80,6 +78,44 @@ fn reassign_number() -> LispResult<()> {
 }
 
 // allocate ATOM_TABLE_SIZE atoms, then expect error
+#[test]
+fn allocate_max_atoms() -> LispResult<()> {
+    use crate::vm::ATOM_TABLE_SIZE;
+
+    let mut vm = VirtualMachine::new();
+
+    let mut names = vec![];
+
+    let mut gen_name = move || {
+        use rand::{distributions::Uniform, Rng};
+
+        let mut name;
+        loop {
+            name = rand::thread_rng()
+                .sample_iter(Uniform::new(char::from(97), char::from(122)))
+                .take(7)
+                .map(char::from)
+                .collect::<String>();
+
+            if !names.contains(&name) {
+                break;
+            }
+        }
+        names.push(name.clone());
+        name
+    };
+
+    while vm.atoms.last < ATOM_TABLE_SIZE {
+        let name = gen_name();
+        vm.make_atom(&name)?;
+    }
+
+    assert!(vm.make_atom(&gen_name()).is_err());
+    assert!(vm.make_atom(&gen_name()).is_err());
+    assert!(vm.make_atom(&gen_name()).is_err());
+
+    Ok(())
+}
 
 // allocate NUMBER_TABLE_SIZE numbers, then expect error
 

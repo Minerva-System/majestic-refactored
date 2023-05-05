@@ -25,7 +25,12 @@ impl VirtualMachine {
         let ptr = self.atoms.last;
         self.atoms.last += 1;
 
-        let atom: &mut Atom = self.atoms.area.get_mut(ptr).unwrap();
+        let atom: &mut Atom = self
+            .atoms
+            .area
+            .get_mut(ptr)
+            .ok_or(())
+            .map_err(|_| LispError::atom_table_allocation())?;
         atom.name = String::from(name);
         atom.value = TypedPointer::new(DataType::Undefined, 0);
         // atom.bindlist = 0;
