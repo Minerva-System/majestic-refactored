@@ -2,7 +2,7 @@ use super::{types::*, ConstSymbol};
 
 impl VirtualMachine {
     pub fn new() -> Box<Self> {
-        let mut vm = Box::new(VirtualMachine::default());
+        let mut vm = Box::<VirtualMachine>::default();
 
         // The order of these symbols must match the ConstSymbol enum!
         let primitive_atoms = vec![
@@ -79,7 +79,7 @@ impl VirtualMachine {
 
         for i in 1..units.len() {
             if num >= 1024 {
-                num = num / 1024;
+                num /= 1024;
             } else {
                 unit = i - 1;
                 break;

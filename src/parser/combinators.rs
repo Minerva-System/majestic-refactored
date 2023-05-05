@@ -144,22 +144,22 @@ impl Combinators {
 
             let quoted = just('\'')
                 .ignore_then(expression.clone())
-                .map(|e| Expr::Prefixed(PrefixType::Quote, Box::new(e.clone())))
+                .map(|e| Expr::Prefixed(PrefixType::Quote, Box::new(e)))
                 .labelled("quoted expression");
 
             let quasiquoted = just('`')
                 .ignore_then(expression.clone())
-                .map(|e| Expr::Prefixed(PrefixType::Quasiquote, Box::new(e.clone())))
+                .map(|e| Expr::Prefixed(PrefixType::Quasiquote, Box::new(e)))
                 .labelled("quasiquoted expression");
 
             let unquoted_splice = just(",@")
                 .ignore_then(expression.clone())
-                .map(|e| Expr::Prefixed(PrefixType::UnquoteSplice, Box::new(e.clone())))
+                .map(|e| Expr::Prefixed(PrefixType::UnquoteSplice, Box::new(e)))
                 .labelled("unquoted expression");
 
             let unquoted = just(',')
                 .ignore_then(expression.clone())
-                .map(|e| Expr::Prefixed(PrefixType::Unquote, Box::new(e.clone())))
+                .map(|e| Expr::Prefixed(PrefixType::Unquote, Box::new(e)))
                 .labelled("unquoted expression");
 
             Self::comment()

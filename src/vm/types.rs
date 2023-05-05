@@ -67,24 +67,14 @@ impl std::fmt::Display for TypedPointer {
     }
 }
 
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct Cons {
     pub marked: u8,
     pub car: TypedPointer,
     pub cdr: TypedPointer,
 }
 
-impl Default for Cons {
-    fn default() -> Self {
-        Self {
-            marked: 0,
-            car: TypedPointer::default(),
-            cdr: TypedPointer::default(),
-        }
-    }
-}
-
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct Atom {
     pub name: String,
     pub value: TypedPointer,
@@ -92,30 +82,14 @@ pub struct Atom {
     // pub bindlist: UntypedPointer,
 }
 
-impl Default for Atom {
-    fn default() -> Self {
-        Self {
-            name: String::new(),
-            value: TypedPointer::default(),
-            // plist: 0,
-            // bindlist: 0,
-        }
-    }
-}
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub enum Number {
+    #[default]
     Undefined,
     Integer(i64),
     Float(f64),
     Fraction(i64, i64),
     Complex(Box<Number>, Box<Number>),
-}
-
-impl Default for Number {
-    fn default() -> Number {
-        Number::Undefined
-    }
 }
 
 impl Number {
@@ -152,7 +126,7 @@ impl std::fmt::Display for Number {
 /// - `continue`: Place to go next.
 /// - `val`: Result of evaluation.
 /// - `unev`: Temporary register for expressions.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, Default)]
 pub struct RegisterArea {
     pub exp: TypedPointer,
     pub env: TypedPointer,
@@ -161,20 +135,6 @@ pub struct RegisterArea {
     pub cont: TypedPointer,
     pub val: TypedPointer,
     pub unev: TypedPointer,
-}
-
-impl Default for RegisterArea {
-    fn default() -> Self {
-        Self {
-            exp: TypedPointer::default(),
-            env: TypedPointer::default(),
-            fun: TypedPointer::default(),
-            argl: TypedPointer::default(),
-            cont: TypedPointer::default(),
-            val: TypedPointer::default(),
-            unev: TypedPointer::default(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Eq, PartialEq)]
@@ -285,7 +245,7 @@ impl Default for EnvironmentTable {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Default)]
 pub struct VirtualMachine {
     pub registers: RegisterArea,
     pub stack: StackArea,
@@ -295,18 +255,4 @@ pub struct VirtualMachine {
     pub environments: EnvironmentTable,
 
     pub atom_index: std::collections::HashMap<String, usize>,
-}
-
-impl Default for VirtualMachine {
-    fn default() -> Self {
-        Self {
-            registers: RegisterArea::default(),
-            stack: StackArea::default(),
-            atoms: AtomTable::default(),
-            numbers: NumberTable::default(),
-            lists: ListArea::default(),
-            environments: EnvironmentTable::default(),
-            atom_index: std::collections::HashMap::new(),
-        }
-    }
 }

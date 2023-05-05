@@ -2,14 +2,14 @@ use super::expression::*;
 use crate::vm::error::*;
 use crate::vm::*;
 
-pub fn build_ast(mut vm: &mut VirtualMachine, expr: Expr) -> LispResult<TypedPointer> {
+pub fn build_ast(vm: &mut VirtualMachine, expr: Expr) -> LispResult<TypedPointer> {
     match expr {
-        Expr::Atom(atom_expr) => build_atom_ast(&mut vm, atom_expr),
-        Expr::Prefixed(prefix, boxed_expr) => build_prefixed_ast(&mut vm, prefix, *boxed_expr),
-        Expr::List(exprs) => build_list_ast(&mut vm, exprs),
-        Expr::DottedList(exprs) => build_dotted_list_ast(&mut vm, exprs),
+        Expr::Atom(atom_expr) => build_atom_ast(vm, atom_expr),
+        Expr::Prefixed(prefix, boxed_expr) => build_prefixed_ast(vm, prefix, *boxed_expr),
+        Expr::List(exprs) => build_list_ast(vm, exprs),
+        Expr::DottedList(exprs) => build_dotted_list_ast(vm, exprs),
         Expr::Vector(_exprs) => Err(LispError::internal("vector storage not implemented")),
-        Expr::Cons(boxed_car, boxed_cdr) => build_cons_ast(&mut vm, *boxed_car, *boxed_cdr),
+        Expr::Cons(boxed_car, boxed_cdr) => build_cons_ast(vm, *boxed_car, *boxed_cdr),
         _ => vm.make_atom("nil"),
     }
 }
@@ -33,7 +33,7 @@ fn build_number_ast(expr: NumberExpr) -> Number {
     }
 }
 
-fn build_list_ast(mut vm: &mut VirtualMachine, exprs: Vec<Expr>) -> LispResult<TypedPointer> {
+fn build_list_ast(vm: &mut VirtualMachine, exprs: Vec<Expr>) -> LispResult<TypedPointer> {
     if exprs.is_empty() {
         return Ok(ConstSymbol::NIL);
     }
@@ -41,7 +41,7 @@ fn build_list_ast(mut vm: &mut VirtualMachine, exprs: Vec<Expr>) -> LispResult<T
     let first = vm.make_cons()?;
     let mut iter = first.clone();
     for (i, expr) in exprs.iter().enumerate() {
-        let ptr = build_ast(&mut vm, expr.clone())?;
+        let ptr = build_ast(vm, expr.clone())?;
         vm.set_car(&iter, ptr)?;
 
         if i == exprs.len() - 1 {
@@ -56,10 +56,7 @@ fn build_list_ast(mut vm: &mut VirtualMachine, exprs: Vec<Expr>) -> LispResult<T
     Ok(first)
 }
 
-fn build_dotted_list_ast(
-    mut vm: &mut VirtualMachine,
-    exprs: Vec<Expr>,
-) -> LispResult<TypedPointer> {
+fn build_dotted_list_ast(vm: &mut VirtualMachine, exprs: Vec<Expr>) -> LispResult<TypedPointer> {
     if exprs.is_empty() {
         // probably a weird syntax error that slipped through the cracks,
         // if this code is reached
@@ -75,7 +72,7 @@ fn build_dotted_list_ast(
     let first = vm.make_cons()?;
     let mut iter = first.clone();
     for (i, expr) in exprs.iter().enumerate() {
-        let ptr = build_ast(&mut vm, expr.clone())?;
+        let ptr = build_ast(vm, expr.clone())?;
 
         if i == exprs.len() - 1 {
             // If we're at the end, assign to previous cdr
@@ -94,12 +91,12 @@ fn build_dotted_list_ast(
 }
 
 fn build_cons_ast(
-    mut vm: &mut VirtualMachine,
+    vm: &mut VirtualMachine,
     car_expr: Expr,
     cdr_expr: Expr,
 ) -> LispResult<TypedPointer> {
-    let car = build_ast(&mut vm, car_expr)?;
-    let cdr = build_ast(&mut vm, cdr_expr)?;
+    let car = build_ast(vm, car_expr)?;
+    let cdr = build_ast(vm, cdr_expr)?;
 
     let cons = vm.make_cons()?;
     vm.set_car(&cons, car)?;
@@ -109,7 +106,7 @@ fn build_cons_ast(
 }
 
 pub fn build_prefixed_ast(
-    mut vm: &mut VirtualMachine,
+    vm: &mut VirtualMachine,
     prefix: PrefixType,
     expr: Expr,
 ) -> LispResult<TypedPointer> {
@@ -123,5 +120,5 @@ pub fn build_prefixed_ast(
         .to_owned(),
     );
 
-    build_list_ast(&mut vm, vec![prefix_expr, expr])
+    build_list_ast(vm, vec![prefix_expr, expr])
 }

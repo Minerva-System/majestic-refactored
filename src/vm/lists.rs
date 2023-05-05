@@ -1,5 +1,5 @@
 use super::error::{LispError, LispResult};
-use super::{types::*, ConstSymbol};
+use super::types::*;
 
 impl VirtualMachine {
     pub fn make_cons(&mut self) -> LispResult<TypedPointer> {
