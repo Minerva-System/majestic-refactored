@@ -41,26 +41,49 @@ fn self_eval_atoms() -> LispResult<()> {
     assert_eq!(t_ptr, ConstSymbol::T);
 
     // Check if they are self evaluating
-    let nil_val = &vm
-        .atoms
-        .area
-        .get(nil_ptr.value)
-        .ok_or(())
-        .map_err(|_| LispError::internal("Could not find atom"))?
-        .value;
+    let nil_val = vm.lookup_atom_value(nil_ptr.clone())?;
+    let t_val = vm.lookup_atom_value(t_ptr.clone())?;
 
-    let t_val = &vm
-        .atoms
-        .area
-        .get(t_ptr.value)
-        .ok_or(())
-        .map_err(|_| LispError::internal("Could not find atom"))?
-        .value;
-
-    assert_eq!(nil_ptr, *nil_val);
-    assert_eq!(ConstSymbol::NIL, *nil_val);
-    assert_eq!(t_ptr, *t_val);
-    assert_eq!(ConstSymbol::T, *t_val);
+    assert_eq!(nil_ptr, nil_val);
+    assert_eq!(ConstSymbol::NIL, nil_val);
+    assert_eq!(t_ptr, t_val);
+    assert_eq!(ConstSymbol::T, t_val);
 
     Ok(())
 }
+
+// assign number to atom, then assign new number, effectively
+// copying it to the same number slot
+#[test]
+fn reassign_number() -> LispResult<()> {
+    let mut vm = VirtualMachine::new();
+
+    let my_atom = vm.make_atom("test")?;
+    let my_number = vm.make_number(Number::Integer(50))?;
+    vm.assign_value(my_atom.clone(), my_number.clone())?;
+
+    let lookup = vm.lookup_atom_value(my_atom.clone())?;
+    assert_eq!(lookup, my_number);
+    assert_eq!(vm.numbers.area[lookup.value], Number::Integer(50));
+
+    let another_number = vm.make_number(Number::Integer(30))?;
+    vm.assign_value(my_atom.clone(), another_number.clone())?;
+
+    let lookup = vm.lookup_atom_value(my_atom)?;
+    assert_eq!(lookup, my_number); // Pointers must be the same
+    assert!(my_number != another_number); // Values must not use same pointer
+
+    // Value was copied to old number slot
+    assert_eq!(vm.numbers.area[lookup.value], Number::Integer(30));
+
+    Ok(())
+}
+
+// allocate ATOM_TABLE_SIZE atoms, then expect error
+
+// allocate NUMBER_TABLE_SIZE numbers, then expect error
+
+// attempt assignment to non-atom value, then expect error
+
+// create fake unallocated atom with big index, attempt
+// assignment, then expect error
