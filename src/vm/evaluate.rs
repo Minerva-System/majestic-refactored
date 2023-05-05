@@ -456,7 +456,6 @@ impl VirtualMachine {
             return Ok(value);
         }
 
-        let atom: &Atom = self.atoms.area.get(atom.value).unwrap();
-        Ok(atom.value.clone())
+        self.lookup_atom_value(atom)
     }
 }

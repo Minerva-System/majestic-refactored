@@ -76,4 +76,21 @@ impl VirtualMachine {
 
         Ok(())
     }
+
+    pub fn lookup_atom_value(&self, atom: TypedPointer) -> LispResult<TypedPointer> {
+        if atom.tag != DataType::Atom {
+            return Err(LispError::internal("attempted to lookup value of non-atom"));
+        }
+
+        if atom.value >= self.atoms.last {
+            return Err(LispError::internal(
+                "attempted to lookup assigned value of unallocated atom",
+            ));
+        }
+
+        let atom: &Atom = self.atoms.area.get(atom.value).ok_or(()).map_err(|_| {
+            LispError::internal("attempted to lookup assigned value of unexisting atom")
+        })?;
+        Ok(atom.value.clone())
+    }
 }
