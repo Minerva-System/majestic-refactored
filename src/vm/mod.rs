@@ -19,3 +19,6 @@ pub use environment::*;
 pub use evaluate::*;
 pub use primitive_eval::*;
 pub use stack::*;
+
+#[cfg(test)]
+mod test;
