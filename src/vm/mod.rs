@@ -3,16 +3,16 @@ pub mod constants;
 pub mod environment;
 pub mod error;
 pub mod evaluate;
+pub mod general;
 pub mod lists;
 pub mod primitive_eval;
 pub mod stack;
 pub mod types;
-pub mod vm;
 
 pub use atoms::*;
 pub use constants::*;
+pub use general::*;
 pub use types::*;
-pub use vm::*;
 
 // Maybe not needed?
 pub use environment::*;
