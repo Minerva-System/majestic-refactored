@@ -36,7 +36,7 @@ impl VirtualMachine {
         // atom.bindlist = 0;
         // atom.plist = 0;
 
-        self.atom_index.insert(String::from(name), ptr);
+        let _ = self.atom_index.insert(String::from(name), ptr);
 
         Ok(TypedPointer::new(DataType::Atom, ptr))
     }

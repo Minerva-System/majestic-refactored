@@ -4,6 +4,7 @@
 // pub const LISP_STACK_SIZE: usize = 8388608; // 8MB stack
 
 use super::ConstSymbol;
+use radix_trie::Trie;
 
 pub const ATOM_TABLE_SIZE: usize = 10000; // 30000 atoms
 pub const NUMBER_TABLE_SIZE: usize = 10000; // 30000 numbers (indexed after atom table)
@@ -254,5 +255,5 @@ pub struct VirtualMachine {
     pub lists: ListArea,
     pub environments: EnvironmentTable,
 
-    pub atom_index: std::collections::HashMap<String, usize>,
+    pub atom_index: Trie<String, usize>,
 }

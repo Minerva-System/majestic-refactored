@@ -557,6 +557,7 @@ dependencies = [
  "float-cmp",
  "log",
  "log4rs",
+ "radix_trie",
  "rand",
  "regex",
  "rustyline",

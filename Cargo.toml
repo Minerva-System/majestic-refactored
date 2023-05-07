@@ -25,6 +25,7 @@ log = "0.4.17"
 log4rs = "1.2.0"
 rustyline = "10.1.1"
 rustyline-derive = "0.7.0"
+radix_trie = "0.2.1"
 
 [dev-dependencies]
 regex = "1.8.1"
