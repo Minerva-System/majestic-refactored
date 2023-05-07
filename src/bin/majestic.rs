@@ -15,10 +15,14 @@ use vm::VirtualMachine;
 
 fn load_log_config() {
     let mut cfg = std::env::current_dir().unwrap();
-    cfg.push("log_config.yml");
+    cfg.push("logcfg.yml");
 
-    if let Ok(_) = log4rs::init_file(cfg.clone(), Default::default()) {
-        debug!("Loaded log config file: {}", cfg.display());
+    if cfg.exists() {
+        println!("Loading log config...");
+        match log4rs::init_file(cfg.clone(), Default::default()) {
+            Ok(_) => info!("Loaded log config file: {}", cfg.display()),
+            Err(e) => println!("Could not load log config: {:?}", e),
+        };
     }
 }
 
