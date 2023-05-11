@@ -30,6 +30,7 @@ impl VirtualMachine {
         }
     }
 
+    // Note: popped amount also counts the popped marker
     pub fn stack_unwind(&mut self, marker: TypedPointer) -> usize {
         let mut popped = 0;
         while self.stack.area[self.stack.last] != marker {
@@ -41,7 +42,8 @@ impl VirtualMachine {
         }
 
         if self.stack.last > 0 {
-            self.stack.last -= 1;
+            // Erase marker
+            self.stack.area[self.stack.last] = TypedPointer::default();
         }
 
         popped
