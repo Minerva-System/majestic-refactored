@@ -3,7 +3,7 @@ use std::collections::VecDeque;
 use super::constants::*;
 use super::error::{LispError, LispResult};
 use super::types::*;
-use log::{debug, trace};
+use log::trace;
 
 macro_rules! special_form_p {
     ($vm:expr, $sym: expr) => {

@@ -61,6 +61,7 @@ impl std::fmt::Display for TypedPointer {
                 DataType::Function => "FUNCT",
                 DataType::Literal => "LITER",
                 DataType::Environment => "  ENV",
+                #[allow(unreachable_patterns)]
                 _ => "UNKNW",
             },
             self.value
