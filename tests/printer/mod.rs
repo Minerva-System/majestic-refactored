@@ -226,3 +226,40 @@ fn format_dotted_list() {
     generate_ast_test!(vm, "(baz (x) . (* x . x))", "(baz (x) * x . x)");
     generate_ast_test!(vm, "(() () . ())", "(nil nil)");
 }
+
+// typed pointers
+#[test]
+fn format_typed_pointers() {
+    use regex::Regex;
+    use vm::{
+        types::{Number, TypedPointer},
+        ConstSymbol,
+    };
+
+    let mut vm = vm::VirtualMachine::new();
+    let re = Regex::new(RegularExpression::TYPED_POINTER).expect("Regex engine built");
+
+    // Define all kinds of typed pointers
+    let pointers = vec![
+        // Undefined
+        TypedPointer::default(),
+        // Cons
+        vm.make_cons().expect("Create cons"),
+        // Atom
+        ConstSymbol::T,
+        // Number
+        vm.make_number(Number::Integer(3)).expect("Create number"),
+        // Built-in function
+        ConstSymbol::BIN_CDR,
+        // Built-in literal
+        ConstSymbol::EVAL_ASSIGN,
+        // Environment
+        ConstSymbol::E0,
+    ];
+
+    for pointer in pointers {
+        let representation = format!("{}", pointer).trim().to_owned();
+        assert_ne!(representation, "UNKNW"); // Should NEVER be unknown.
+        assert!(re.is_match(&representation));
+    }
+}

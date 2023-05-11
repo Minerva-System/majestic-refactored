@@ -87,25 +87,31 @@ impl RegularExpression {
     /// - `#<ENV0>`
     /// - `#<ENV3>`
     /// - `#<ENV59>`
-    pub const ENVIRONMENT: &'static str = r"^(?u)#<ENV[0-9]*>$";
+    pub const ENVIRONMENT: &str = r"^(?u)#<ENV[0-9]*>$";
 
     /// Regular expression for function textual format.
     /// ### Example
     /// `#<FUNCTION {0xdeadbeef}>`
-    pub const FUNCTION: &'static str = r"(?u)^#<FUNCTION \{0x[0-9a-z]*\}>$";
+    pub const FUNCTION: &str = r"(?u)^#<FUNCTION \{0x[0-9a-z]*\}>$";
 
     /// Regular expression for literal textual format.
     /// ### Example
     /// `#<LITERAL {0xdeadbeef}>`
-    pub const LITERAL: &'static str = r"(?u)^#<LITERAL \{0x[0-9a-z]*\}>$";
+    pub const LITERAL: &str = r"(?u)^#<LITERAL \{0x[0-9a-z]*\}>$";
 
     /// Regular expression for built-in function textual format.
     /// ### Example
     /// `#<BUILTIN-FUNCTION {0xdeadbeef}>`
-    pub const BUILTIN_FUNCTION: &'static str = r"(?u)^#<BUILTIN-FUNCTION \{0x[0-9a-z]*\}>$";
+    pub const BUILTIN_FUNCTION: &str = r"(?u)^#<BUILTIN-FUNCTION \{0x[0-9a-z]*\}>$";
 
     /// Regular expression for built-in literal textual format.
     /// ### Example
     /// `#<BUILTIN-LITERAL {0xdeadbeef}>`
-    pub const BUILTIN_LITERAL: &'static str = r"(?u)^#<BUILTIN-LITERAL \{0x[0-9a-z]*\}>$";
+    pub const BUILTIN_LITERAL: &str = r"(?u)^#<BUILTIN-LITERAL \{0x[0-9a-z]*\}>$";
+
+    /// Regular expression for typed pointers. Remember to trim the string
+    /// before comparing.
+    /// ### Example
+    /// `CONS::0xdeadbeef`
+    pub const TYPED_POINTER: &str = r"(?u)^[A-Z]*::0x[0-9a-z]*$";
 }
