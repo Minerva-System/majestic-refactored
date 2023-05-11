@@ -110,6 +110,7 @@ fn repl(mut vm: &mut VirtualMachine) {
             Ok(line) if line.trim() == "#atom" => vm.print_atom_table(),
             Ok(line) if line.trim() == "#number" => vm.print_number_table(),
             Ok(line) if line.trim() == "#list" => vm.print_list_area(),
+            Ok(line) if line.trim() == "#reg" => vm.print_registers(),
             Ok(line) if line.trim() == "#ast" => ast = !ast,
             Ok(line) if line.trim() == "#echo" => echo = !echo,
             Ok(line) if line.trim().starts_with("#env") => match line.trim()[4..].trim().parse() {
@@ -256,7 +257,11 @@ fn main() {
     let version = format!(
         "{}{}",
         env!("CARGO_PKG_VERSION"),
-        if VERSION != "" { " nightly" } else { "" }
+        if VERSION != "" {
+            " (nightly build)"
+        } else {
+            ""
+        }
     );
     println!("Majestic Lisp Refactored v{} {}", version, TARGET);
     if VERSION != "" {

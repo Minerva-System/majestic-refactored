@@ -272,4 +272,30 @@ impl VirtualMachine {
 
         println!("{}", table);
     }
+
+    pub fn fmt_registers(&self) -> String {
+        use comfy_table::modifiers::UTF8_ROUND_CORNERS;
+        use comfy_table::presets::UTF8_BORDERS_ONLY;
+        use comfy_table::*;
+
+        let mut table = Table::new();
+        table.load_preset(UTF8_BORDERS_ONLY);
+        table.apply_modifier(UTF8_ROUND_CORNERS);
+        table.set_content_arrangement(ContentArrangement::Dynamic);
+        table.set_header(&vec!["NAME", "VALUE"]);
+
+        table.add_row(vec!["exp", &format!("{}", self.registers.exp)]);
+        table.add_row(vec!["env", &format!("{}", self.registers.env)]);
+        table.add_row(vec!["fun", &format!("{}", self.registers.fun)]);
+        table.add_row(vec!["argl", &format!("{}", self.registers.argl)]);
+        table.add_row(vec!["cont", &format!("{}", self.registers.cont)]);
+        table.add_row(vec!["val", &format!("{}", self.registers.val)]);
+        table.add_row(vec!["unev", &format!("{}", self.registers.unev)]);
+
+        table.to_string()
+    }
+
+    pub fn print_registers(&self) {
+        println!("{}", self.fmt_registers());
+    }
 }
