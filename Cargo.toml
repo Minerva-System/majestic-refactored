@@ -5,6 +5,7 @@ edition = "2021"
 build = "build.rs"
 
 [lib]
+crate-type = ["cdylib", "rlib"]
 name = "majestic"
 path = "src/lib.rs"
 
@@ -12,21 +13,40 @@ path = "src/lib.rs"
 name = "majestic"
 path = "src/bin/majestic.rs"
 
+[[bin]]
+name = "majestic-wasm"
+path = "src/bin/majestic-wasm.rs"
+
 [build-dependencies]
 chrono = "0.4.23"
 
 [dependencies]
 ariadne = "0.1.5"
 chumsky = "0.8.0"
-colored = "2.0.0"
-comfy-table = "6.1.4"
 float-cmp = "0.9.0"
-log = "0.4.17"
-log4rs = "1.2.0"
-rustyline = "10.1.1"
-rustyline-derive = "0.7.0"
 radix_trie = "0.2.1"
+log = "0.4.17"
 
 [dev-dependencies]
 regex = "1.8.1"
 rand = "0.8.5"
+
+[target.'cfg(target_arch="wasm32")'.dependencies]
+wasm-bindgen = "0.2.37"
+
+[target.'cfg(target_arch="wasm32")'.dependencies.web-sys]
+version = "0.3.4"
+features = [
+  'Document',
+  'Element',
+  'HtmlElement',
+  'Node',
+  'Window',
+]
+
+[target.'cfg(not(target_arch="wasm32"))'.dependencies]
+colored = "2.0.0"
+comfy-table = "6.1.4"
+rustyline = "10.1.1"
+rustyline-derive = "0.7.0"
+log4rs = "1.2.0"

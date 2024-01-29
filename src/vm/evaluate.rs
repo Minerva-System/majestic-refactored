@@ -48,16 +48,20 @@ impl VirtualMachine {
                     self.ev_do()
                 } else {
                     // Application
-                    if EvalHelper::applicationp(&self, exp)? {
-                        self.ev_application()
-                    } else {
-                        self.ev_expression_error()
-                    }
+                    // EvalHelper::applicationp(&self, exp)? {
+                    self.ev_application()
+                    //else {
+                    //  self.ev_expression_error()
+                    //
                 }
             }
         }
     }
 
+    // ev-do
+    // evaluate form by form
+    // we did this for functions but we need an adaptation.
+    // also, we should hold and return the last form's interpretation value
     fn ev_do(&mut self) -> LispResult<()> {
         Err(LispError::internal(
             "unimplemented evaluation for special form DO",

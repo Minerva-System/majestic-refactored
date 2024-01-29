@@ -89,6 +89,7 @@ impl VirtualMachine {
         format!("{} {}", num, units[unit])
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn debrief(&self) {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_FULL_CONDENSED;
@@ -180,6 +181,7 @@ impl VirtualMachine {
         println!("{}", table);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_list_area(&self) {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_BORDERS_ONLY;
@@ -203,6 +205,7 @@ impl VirtualMachine {
         println!("{}", table);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_atom_table(&self) {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_BORDERS_ONLY;
@@ -226,6 +229,7 @@ impl VirtualMachine {
         println!("{}", table);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_number_table(&self) {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_BORDERS_ONLY;
@@ -245,6 +249,7 @@ impl VirtualMachine {
         println!("{}", table);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_env(&self, i: usize) {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_BORDERS_ONLY;
@@ -273,6 +278,7 @@ impl VirtualMachine {
         println!("{}", table);
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn fmt_registers(&self) -> String {
         use comfy_table::modifiers::UTF8_ROUND_CORNERS;
         use comfy_table::presets::UTF8_BORDERS_ONLY;
@@ -295,6 +301,7 @@ impl VirtualMachine {
         table.to_string()
     }
 
+    #[cfg(not(target_arch = "wasm32"))]
     pub fn print_registers(&self) {
         println!("{}", self.fmt_registers());
     }

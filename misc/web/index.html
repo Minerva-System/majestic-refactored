@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Majestic Lisp Refactored (WASM)</title>
+    <link href="fonts/go83/go83.css" rel="stylesheet">
+    <link href="fonts/minion3/fonts.css" rel="stylesheet">
+    <script src="wasm_exec.js"></script>
+    <!-- <script src="majestic.js" type="text/javascript"></script> -->
+    <script type="text/javascript">
+     function fetchAndInstantiate(url, importObject) {
+       return fetch(url).then(response =>
+	 response.arrayBuffer()
+       ).then(bytes =>
+	 WebAssembly.instantiate(bytes, importObject)
+       ).then(results =>
+	 results.instance
+       );
+     }
+     
+     var go = new Go();
+     var mod = fetchAndInstantiate("main.wasm", go.importObject);
+     window.onload = function() {
+       mod.then(function(instance) {
+	 go.run(instance);
+       });
+     };
+
+     console.log("Golang loaded");
+    </script>
+    <script src="majestic.js"></script>
+    <script>
+     const { majestic_init, majestic_eval } = wasm_bindgen;
+
+     async function run() {
+       await wasm_bindgen();
+
+       majestic_init();
+       const result = majestic_eval('(cons 1 2)');
+       console.log(`(cons 1 2) => ${result}`);
+     }
+
+     run();
+    </script>
+
+    <!-- <script type="module">
+	 import wasm_bindgen from './majestic.js';
+	 import majestic_init from './majestic.js';
+	 import majestic_eval from './majestic.js';
+
+	 var maj_init = majestic_init;
+	 var maj_eval = majestic_eval;
+
+	 async function run() {
+	 await wasm_bindgen();
+
+	 majestic_init();
+	 const result = majestic_eval("(cons 1 2)");
+	 console.log(`(cons 1 2) => ${result}`);
+	 }
+
+	 run();
+	 </script> -->
+    
+    <style>
+     html {
+	 scroll-behavior: smooth;
+	 font-family: 'Minion 3', 'Minion Pro', serif;
+     }
+     #input {
+	 outline: none;
+     }
+     #controls {
+     }
+     #output {
+	 width: 100%;
+	 outline: none;
+     }
+     #img-output {
+	 width: 250px;
+	 height: 100%;
+     }
+     #help {
+	 font-size: 80%;
+     }
+     #about {
+	 margin-top: 2em;
+	 width: 40em;
+     }
+     #tty0, #tty1, #tty2, #tty3, #tty4, #tty5, #tty6, #tty7 {
+	 display: none;
+     }
+     .selected {
+	 background-color: blue;
+	 color: white;
+     }
+     h1 {
+	 text-align: left !important;
+	 font-size: 140%;
+     }
+     code, pre {
+	 font-family: 'Go83 Mono', monospace;
+	 font-size: 100%;
+     }
+     #input {
+	 position: absolute;
+	 left: -1000px;
+	 top: 0px;
+     }
+    </style>
+  </head>
+  <body>
+    <h1>Majestic Lisp Refactored (WASM)</h1>
+
+    <input type="text" id="input"></input>
+    <pre>
+      <div id="tty"></div>
+      <div id="bottom"></div>
+    </pre>
+
+    <!-- <div id="about">
+	 <p>
+	 This web page runs a Go port of <br>
+	 the Research Unix Sixth Edition kernel,<br>
+	 running user-mode code in a simulated <br>
+	 PDP11 CPU, all compiled to WebAssembly, <br>
+	 executed in your browser.
+	 </p>
+	 <p>
+	 A few accounts are root, dmr, and ken.<br>
+	 The password is the username.<br>
+	 Have fun poking around.
+	 </p>
+	 <p><code>cd</code> is spelled <code>chdir</code>.</p>
+	 <p>Erase is #, and line kill is @. <br>
+	 As a convenience to 21st century users, <br>
+	 typing backspace and ^U generate these.</p>
+
+	 <p>Echoed terminal input appears in bold.</p>
+
+	 <p>The simulator runs in the browser UI thread,<br>
+	 so long computations block the browser UI.
+	 </p>
+
+	 <p>On mobile devices, clicking a tty button<br>
+	 should bring up the keyboard, <br>
+	 but scrolling to the output point seems broken. <br>
+	 <a href="https://github.com/rsc/unix/">Patches welcome.</a>
+	 </p>
+
+	 </div> -->
+  </body>
+</html>
